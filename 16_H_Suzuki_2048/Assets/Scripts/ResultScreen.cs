@@ -15,6 +15,19 @@ public class ResultScreen : MonoBehaviour,IResultScreen
     [SerializeField]
     private TextMeshProUGUI _scoreText;
 
+    [SerializeField]
+    private TextMeshProUGUI _highScoreText;
+
+    [SerializeField]
+    private SessionData _sessionData;
+
+    [SerializeField]
+    GameObject UpdateScore;
+
+    private bool ScoreUpdated = false;
+
+    private int highScore;
+
 
     // Start is called before the first frame update
     void Start()
@@ -36,8 +49,13 @@ public class ResultScreen : MonoBehaviour,IResultScreen
     void Init() 
     {
         _titleButton.onClick.AddListener(BackToTitle);
-        SaveBestScore(SessionData.instance.score);
-        _scoreText.SetText(SessionData.instance.score.ToString());
+        SaveBestScore(_sessionData.score);
+        _scoreText.SetText(_sessionData.score.ToString());
+        _highScoreText.SetText(highScore.ToString());
+        if (ScoreUpdated) 
+        {
+            UpdateScore.SetActive(true);
+        }
     }
 
     void UnInit() 
@@ -51,30 +69,31 @@ public class ResultScreen : MonoBehaviour,IResultScreen
     }
 
     //ÉXÉRÉAÇÃìoò^
-    public void SaveBestScore(int score) 
+    public void SaveBestScore(int crrScore) 
     {
-        var highScore =0;
+        highScore =0;
 
         StringBuilder filePath;
         filePath = new StringBuilder();
-        string path = Application.persistentDataPath;
+        string path = Application.streamingAssetsPath;
         string name = "best_score.txt";
-        filePath.Append(filePath.ToString()).Append("/").Append(name.ToString());
+        //  äKëwÇãÊêÿÇÈï∂éöÇÕOSàÀë∂Ç»ÇÃÇ≈îƒópìIÇ»Ç‡ÇÃÇégÇ§
+        filePath.Append(path).Append(Path.DirectorySeparatorChar).Append(name);
         if (File.Exists(filePath.ToString()))
         {
             var text = File.ReadAllText(filePath.ToString());
-           highScore = int.Parse(text);
-
-            
+           highScore = int.Parse(text); 
         }
         else
         {
             File.Create(filePath.ToString()).Close();
         }
 
-        if (highScore < score)
+        if (highScore < crrScore)
         {
-            File.WriteAllText(filePath.ToString(), score.ToString());
+            highScore = crrScore;
+            File.WriteAllText(filePath.ToString(), crrScore.ToString());
+            ScoreUpdated = true;
         }
     }
 }

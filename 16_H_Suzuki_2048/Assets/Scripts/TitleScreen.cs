@@ -19,6 +19,9 @@ public class TitleScreen : MonoBehaviour,ITitleScreen
     void Start()
     {
         Init();
+        int screenHeight = Screen.height;
+        int screenWidth = (int)(screenHeight*(9f/16f));
+        Screen.SetResolution(screenWidth, screenHeight,false);
     }
 
     private void OnDestroy()
@@ -29,6 +32,8 @@ public class TitleScreen : MonoBehaviour,ITitleScreen
     private void Init() 
     {
         _startButton.onClick.AddListener(StartGame);
+        var HighScore = LoadOrCreateBestScore();
+        _highScoreText.SetText(HighScore.ToString());
     }
 
     private void UnInit() 
@@ -48,9 +53,9 @@ public class TitleScreen : MonoBehaviour,ITitleScreen
         int highScore = 0;
         StringBuilder filePath;
         filePath = new StringBuilder();
-        string path = Application.persistentDataPath;
+        string path = Application.streamingAssetsPath;
         string name = "best_score.txt";
-        filePath.Append(filePath.ToString()).Append("/").Append(name.ToString());
+        filePath.Append(path).Append(Path.DirectorySeparatorChar).Append(name);
         if (File.Exists(filePath.ToString()))
         {
             var text = File.ReadAllText(filePath.ToString());
