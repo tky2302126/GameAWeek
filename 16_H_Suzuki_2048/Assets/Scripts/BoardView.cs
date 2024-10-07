@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -65,6 +66,59 @@ public class BoardView : MonoBehaviour
     }
 
     //移動アニメーション・スコア更新アニメーション
+    public IEnumerator PlayUpdateAnimetion(int[,] board, BoardPosition[,] boardMove, int[,] boardSpawn) 
+    {
+        for(int row =0;row< _sessionData.Rows;  row++) 
+        {
+            for(int col =0;col< _sessionData.Columns; col++) 
+            {
+                    var boardPosition = new BoardPosition(row, col);
+                //移動
+                //入力されていなければ飛ばす
+                {
+                    if (boardMove[row,col].row ==-1 || boardMove[row, col].col == -1) { continue; }
+                    var view = cellViews.FirstOrDefault(x => x.CurrentBoardPosition == boardPosition && x.IsShow);
+                    if(view != null) 
+                    {
+                        var destinaton = boardMove[row, col];
+                        StartCoroutine(view.PlayMoveCoroutine(boardMove[row,col], board[destinaton.row,destinaton.col]));
+                    }
+                }
 
+                // 生成
+                // うまくいってない
+                if (boardSpawn[row, col] > 0)
+                {
+                    var view = cellViews.FirstOrDefault(cell => cell.IsShow == false);
+                    if (view != null)
+                    {
+                        StartCoroutine(view.PlaySpawnCoroutine(boardPosition, boardSpawn[row, col]));
+                    }
+                }
+
+            }
+        }
+
+        yield return new WaitForSeconds(_duration);
+
+        // 重複セルを非表示
+        for (var row = 0; row < _sessionData.Rows; row++)
+        {
+            for (var column = 0; column < _sessionData.Columns; column++)
+            {
+                var boardPosition = new BoardPosition(row, column);
+
+                var cells = cellViews.Where(x => x.CurrentBoardPosition == boardPosition && x.IsShow).ToList();
+                for (var i = 1; i < cells.Count; i++)
+                {
+                    cells[i].Hide();
+                }
+            }
+        }
+
+        Set(board);
+
+        //スコアエフェクト再生
+    }
     
 }

@@ -135,6 +135,45 @@ public class CellView : MonoBehaviour
     }
 
     //!アニメーション制御の関数を実装
+    /// <summary>
+    /// アニメーション仕様
+    /// 指定のポイントまで動く
+    /// </summary>
+    /// 
+    public IEnumerator PlayMoveCoroutine(BoardPosition position, int number) 
+    {
+        if (!IsShow) { yield break; }
+
+        CurrentBoardPosition = position;
+        SetNumber(number);
+        var startPosition = ((RectTransform)transform).anchoredPosition;
+        var endPosition = position.GetAnchoredPosition();
+        var progress = 0f;
+
+        //Debug.Log( $"{CurrentBoardPosition.row}{CurrentBoardPosition.col}");
+
+        while (progress < 1f)
+        {
+            progress += Time.deltaTime / Mathf.Max(Mathf.Epsilon, _moveDuration);
+            ((RectTransform)transform).anchoredPosition = Vector3.Lerp(startPosition, endPosition, progress);
+            progress = Mathf.Clamp01(progress);
+            yield return null;
+        }
+    }
+
+    public IEnumerator PlaySpawnCoroutine(BoardPosition position, int number) 
+    {
+        Set(position,number);
+
+        var progress = 1.0f;
+
+        while (progress < 1.0f) 
+        {
+            progress += Time.deltaTime / Mathf.Max(Mathf.Epsilon, _moveDuration);
+            _animationroot.localScale = Vector3.one * Mathf.Clamp01(progress);
+            yield return null;
+        }
+    }
 
     public void Hide() 
     {

@@ -10,6 +10,15 @@
 16_H_Suzuki_2048/[Ll]ogs/
 16_H_Suzuki_2048/[Uu]ser[Ss]ettings/
 
+16_H_Suzuki_Rogue/[Ll]ibrary/
+16_H_Suzuki_Rogue/[Tt]emp/
+16_H_Suzuki_Rogue/[Oo]bj/
+16_H_Suzuki_Rogue/[Bb]uild/
+16_H_Suzuki_Rogue/[Bb]uilds/
+16_H_Suzuki_Rogue/[Ll]ogs/
+16_H_Suzuki_Rogue/[Uu]ser[Ss]ettings/
+
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
