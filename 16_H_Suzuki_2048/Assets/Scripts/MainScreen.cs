@@ -5,6 +5,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.OnScreen;
 using UnityEngine.SceneManagement;
 
 
@@ -117,6 +118,17 @@ public class MainScreen : MonoBehaviour,IMainScreen
     [SerializeField]
     private TextMeshProUGUI _forecastScoreTextRight;
 
+    [SerializeField]
+    private OnScreenStick _stick;
+
+    private Vector2 startTouch;
+
+    private Vector2 endTouch;
+
+    private float swipeThreshHold = 50f;
+
+    private float stickThreshHold = 0.8f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -131,13 +143,19 @@ public class MainScreen : MonoBehaviour,IMainScreen
         initBoard[UnityEngine.Random.Range(0, row), UnityEngine.Random.Range(0, col)] = UnityEngine.Random.Range(0, 10) <= 0 ? 4 : 2;
         InitGame(initBoard, 0);
 
+        SoundManager.Instance.StopBGM();
+
         myUpdatePlaying = false;
-        //_inputActionAsset.Enable();
+        
         _inputActionAsset.FindAction("Up").performed += RecieveInputUp;
         _inputActionAsset.FindAction("Right").performed += RecieveInputRight;
         _inputActionAsset.FindAction("Down").performed += RecieveInputDown;
         _inputActionAsset.FindAction("Left").performed += RecieveInputLeft;
         _inputActionAsset.FindAction("Undo").performed += RecieveInputUndo;
+        //_inputActionAsset.FindAction("Touch").started += RecieveInputTouch;
+        //_inputActionAsset.FindAction("Touch").performed += RecieveInputTouch;
+        //_inputActionAsset.FindAction("Touch").canceled += RecieveInputTouch;
+        
 
         _boardView.UpdateScore(Score);
         _boardView.Set(Board);
@@ -150,9 +168,11 @@ public class MainScreen : MonoBehaviour,IMainScreen
         _forecastScoreTextRight.SetText("0");
 
         _readyUI.SetActive(true);
+        SoundManager.Instance.PlaySE(SE.GameStart);
         yield return CountDown(3);
         _readyUI.SetActive(false);
         _inputActionAsset.Enable();
+        SoundManager.Instance.PlayBGM(BGM.Main);
     }
 
     void OnDestroy() 
@@ -168,6 +188,9 @@ public class MainScreen : MonoBehaviour,IMainScreen
         _inputActionAsset.FindAction("Down").performed -= RecieveInputDown;
         _inputActionAsset.FindAction("Left").performed -= RecieveInputLeft;
         _inputActionAsset.FindAction("Undo").performed -= RecieveInputUndo;
+        //_inputActionAsset.FindAction("Touch").started -= RecieveInputTouch;
+        //_inputActionAsset.FindAction("Touch").performed -= RecieveInputTouch;
+        //_inputActionAsset.FindAction("Touch").canceled -= RecieveInputTouch;
 
         _inputActionAsset.Disable();
     }
@@ -219,6 +242,7 @@ public class MainScreen : MonoBehaviour,IMainScreen
             //ボードのアニメーションとスコア更新
             if (BoardScore != null || BoardMove != null)
             {
+
                 //再生指示
                 yield return _boardView.PlayUpdateAnimetion(Board, BoardMove,boardSpawn);
                 //初期化
@@ -243,6 +267,7 @@ public class MainScreen : MonoBehaviour,IMainScreen
             //ゲームオーバー処理
             { 
                 gameOverUI.SetActive(true);
+                SoundManager.Instance.PlaySE(SE.GameOver);
                 _inputActionAsset.Disable();
                 yield return new WaitForSeconds(1f); 
                 _sessionData.score = Score;
@@ -320,6 +345,128 @@ public class MainScreen : MonoBehaviour,IMainScreen
         }
     }
 
+    //スワイプやマウス操作で動かす予定だった奴
+    private void RecieveInputTouch(InputAction.CallbackContext context) 
+    {
+        var touchPosition = Vector2.zero;
+
+        if (myUpdatePlaying) { return; }
+
+        //入力の受け取り
+        if(Touchscreen.current != null) 
+        {
+            touchPosition = context.ReadValue<Vector2>();
+        }
+        else if(Mouse.current != null) 
+        {
+            touchPosition = Mouse.current.position.ReadValue();
+        }
+
+        if(Gamepad.current != null) 
+        {
+            var leftStickvalue = Gamepad.current.leftStick.ReadValue();
+
+            if(leftStickvalue.magnitude > stickThreshHold) 
+            {
+                StartCoroutine(DetectSwipeGamePad(leftStickvalue, context)) ;
+            }
+        }
+
+        //フェーズごとに振り分け
+        if (context.phase == InputActionPhase.Started)
+        {
+            startTouch = touchPosition;
+            Debug.Log($"Started{startTouch.x},{startTouch.y}");
+        }
+
+        if (context.phase == InputActionPhase.Performed)
+        {
+            endTouch = touchPosition;
+
+            DetectSwipe(context);
+        }
+    }
+
+    //スワイプの検知
+    private void DetectSwipe(InputAction.CallbackContext context) 
+    {
+        
+
+        var swipeDelta = endTouch - startTouch;
+
+        if(swipeDelta.magnitude > swipeThreshHold) 
+        {
+            if(Mathf.Abs(swipeDelta.x) > Mathf.Abs(swipeDelta.y)) 
+            {
+                if(swipeDelta.x < 0) 
+                {
+                    RecieveInputLeft(context);
+                }
+                else 
+                {
+                    RecieveInputRight(context);
+                }
+            }
+            else 
+            {
+                if(swipeDelta.y < 0) 
+                {
+                    RecieveInputDown(context);
+                }
+                else 
+                {
+                    RecieveInputUp(context);
+                }
+            }
+            //スワイプを検知したら、スタート位置を設定しなおし
+            endTouch = startTouch;
+            Debug.Log($"SwipeDetect{endTouch.x},{endTouch.y}");
+        }
+
+    }
+
+    private IEnumerator DetectSwipeGamePad(Vector2 leftstickValue,InputAction.CallbackContext context) 
+    {
+        bool detect = false;
+
+        if (Mathf.Abs(leftstickValue.x) > Mathf.Abs(leftstickValue.y)) 
+        {
+            if(Mathf.Abs(leftstickValue.x) < stickThreshHold) { yield break; }
+
+            detect = true;
+
+            if (leftstickValue.x < 0) 
+            {
+                RecieveInputLeft(context);
+            }
+            else 
+            {   
+                RecieveInputRight(context);
+            }   
+        }
+        else 
+        {
+            if(Mathf.Abs(leftstickValue.y) < stickThreshHold) { yield break ; }
+
+            detect = true;
+            if(leftstickValue.y < 0) 
+            {
+                RecieveInputDown(context);
+            }
+            else 
+            {
+                RecieveInputUp (context);
+            }
+        }
+
+        if (detect) 
+        {
+            _stick.enabled = false;
+            yield return new WaitForSeconds(0.1f);
+            _stick.enabled = true;
+        }
+    }
+
     private void InitBoardMove() 
     {
         if (BoardMove != null) return;
@@ -386,8 +533,15 @@ public class MainScreen : MonoBehaviour,IMainScreen
 #endif
         if (addScore >0 ||  moved) 
         {
-            //アニメーション情報の登録
-            //CompareBoard(previousBoard, inputType);
+            if(addScore >0) 
+            {
+                SoundManager.Instance.PlaySE(SE.cellMerge);
+            }
+            else 
+            {
+                SoundManager.Instance.PlaySE(SE.cellMove);
+            }
+
             Score += addScore;    
             var _boardInfo = new BoardInfo(previousBoard,previousScore);
             prevBoardInfos.Add(_boardInfo);
@@ -1037,5 +1191,7 @@ public class MainScreen : MonoBehaviour,IMainScreen
 
 
     }
+
+
 
 }

@@ -56,6 +56,7 @@ public class ResultScreen : MonoBehaviour,IResultScreen
         {
             UpdateScore.SetActive(true);
         }
+        SoundManager.Instance.StopBGM();
     }
 
     void UnInit() 
@@ -82,7 +83,8 @@ public class ResultScreen : MonoBehaviour,IResultScreen
         if (File.Exists(filePath.ToString()))
         {
             var text = File.ReadAllText(filePath.ToString());
-           highScore = int.Parse(text); 
+            int.TryParse(text, out highScore);
+            
         }
         else
         {

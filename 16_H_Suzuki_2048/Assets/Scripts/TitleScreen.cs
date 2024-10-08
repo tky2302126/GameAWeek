@@ -22,6 +22,7 @@ public class TitleScreen : MonoBehaviour,ITitleScreen
         int screenHeight = Screen.height;
         int screenWidth = (int)(screenHeight*(9f/16f));
         Screen.SetResolution(screenWidth, screenHeight,false);
+        SoundManager.Instance.PlayBGM(BGM.Main);
     }
 
     private void OnDestroy()
@@ -59,7 +60,7 @@ public class TitleScreen : MonoBehaviour,ITitleScreen
         if (File.Exists(filePath.ToString()))
         {
             var text = File.ReadAllText(filePath.ToString());
-            highScore = int.Parse(text);
+            int.TryParse(text, out highScore );
         }
         else 
         {
