@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,12 +25,12 @@ public interface IScreen
 
 public interface IMainScreen 
 {
-    //ƒvƒƒpƒeƒB
+    //ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£
     int[,] Board {  get;}
 
     int Score { get;}
 
-    //ƒƒ\ƒbƒh
+    //ãƒ¡ã‚½ãƒƒãƒ‰
     void InitGame(int[,] board,int score);
 
     void GoToResult();
