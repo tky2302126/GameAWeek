@@ -49,6 +49,7 @@ public class BoardManager : MonoBehaviour
             Instantiate(_exit, new Vector3(columns - 1, rows - 1, 0), Quaternion.identity);
         }
 
+        //1部屋だけのマップを作るスクリプト
         void BoardSetUp() 
         {
             boardHolder = new GameObject("Board").transform;
@@ -108,5 +109,22 @@ public class BoardManager : MonoBehaviour
                 Instantiate(tile, randomPosition, Quaternion.identity);
             }
         }
+
+    public void SetupScene(int level) 
+    {
+        BoardSetUp();
+
+        InitList();
+
+        LayoutObjectAtRandom(_wall, wallCount.minmum, wallCount.maximum);
+
+        LayoutObjectAtRandom(_food,foodCount.minmum, foodCount.maximum);
+
+        int enemyCount = (int)Mathf.Log(level, 2f);
+
+        LayoutObjectAtRandom(_enemy1, enemyCount, enemyCount);
+
+        Instantiate(_exit,new Vector3(columns-1,rows-1), Quaternion.identity);
+    }
 }
 

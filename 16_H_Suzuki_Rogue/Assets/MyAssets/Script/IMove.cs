@@ -2,24 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IMove 
+
+//インターフェースを実装してインターフェースを抽象クラスに継承する
+public interface IMove
 {
-    public const float moveTime = 0.1f;
-    public LayerMask blockingLayer {  get; set; }
+    float moveTime {get; set;}
+    LayerMask blockingLayer {  get; set; }
 
-    public BoxCollider2D collider { get;  set; }
-    public Rigidbody2D rigidbody { get; set; }
-    public float inverseMoveTime { get; set; }
-    public bool isMoving { get; set; }
+    bool Move(int xDir, int yDir, out RaycastHit2D hit);
 
-    public void Init() 
-    {
-        collider = collider.GetComponent<BoxCollider2D>();
-    }
+    IEnumerator SmoothMove(Vector3 end);
+    
+    void AttemptMove<T>(int xDir, int yDir) where T : Component;
 
-    public void Start() 
-    {
-        
-    }
+    void OnCantMove<T>(T component) where T : Component;
 
 }
