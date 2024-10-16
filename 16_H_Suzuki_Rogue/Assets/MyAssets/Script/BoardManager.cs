@@ -50,9 +50,9 @@ public class BoardManager : MonoBehaviour
         }
 
         //1部屋だけのマップを作るスクリプト
-        void BoardSetUp() 
+        void RoomSetUp() 
         {
-            boardHolder = new GameObject("Board").transform;
+            boardHolder = new GameObject("Room").transform;
 
             for(int x = -1;x<columns+1; x++) 
             {
@@ -112,7 +112,7 @@ public class BoardManager : MonoBehaviour
 
     public void SetupScene(int level) 
     {
-        BoardSetUp();
+        RoomSetUp();
 
         InitList();
 
@@ -124,7 +124,44 @@ public class BoardManager : MonoBehaviour
 
         LayoutObjectAtRandom(_enemy1, enemyCount, enemyCount);
 
+        // !出口はemptypositionのどこかに置く
         Instantiate(_exit,new Vector3(columns-1,rows-1), Quaternion.identity);
+    }
+
+    public void DungeonGenerate(int rowSize,int colSize) 
+    {
+        int[,] grid = new int[rowSize,colSize];
+        InitGrid(ref grid);
+
+
+
+    }
+
+    private void InitGrid(ref int[,] grid) 
+    {
+        
+    }
+
+    int CountWallNeighbors(ref int[,] grid,int row,int col) 
+    {
+        int result = 0;
+
+        int[] rowAxis = { -1, -1, -1, 0, 0, 1, 1, 1 };
+
+        int[] colAxis = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+        for(int i = 0; i < 8; i++) 
+        {
+            int newRow = row + rowAxis[i];
+            int newCol = col + colAxis[i];
+
+            if(newRow>=0 && newCol >=0 &&  newRow < grid.GetLength(0) && newCol < grid.GetLength(1)) 
+            {
+                
+            }
+        }
+
+        return result;
     }
 }
 
