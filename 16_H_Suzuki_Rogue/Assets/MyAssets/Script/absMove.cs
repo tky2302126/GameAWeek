@@ -4,9 +4,10 @@ using UnityEngine;
 
 public abstract class absMove : MonoBehaviour, IMove
 {
-    public float moveTime { get; set; } = 0.1f;
+    public float moveTime { get; set; } = 0.01f;
 
-    public LayerMask blockingLayer { get; set; }
+    //! プロパティだとインスペクターから変更できないのでメンバーとした
+    public LayerMask blockingLayer;
 
     private BoxCollider2D boxCollider;
 
@@ -89,9 +90,7 @@ public abstract class absMove : MonoBehaviour, IMove
     }
 
     //継承先で実装
-    public virtual void OnCantMove<T>(T component) where T : Component
-    {
-
-    }
+    public virtual void OnCantMove<T>(T component) where T : Component { }
+    
 
 }

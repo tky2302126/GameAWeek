@@ -33,6 +33,8 @@ public class Enemy : absMove
         skipMove = true;
     }
 
+    // ! セルオートマトンにしたとき、
+    // ! 通路と通路と部屋をつなぐマスには侵入不可とする
     public void MoveEnemy() 
     {
         int xDir = 0;

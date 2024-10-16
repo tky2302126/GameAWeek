@@ -7,7 +7,6 @@ using UnityEngine;
 public interface IMove
 {
     float moveTime {get; set;}
-    LayerMask blockingLayer {  get; set; }
 
     bool Move(int xDir, int yDir, out RaycastHit2D hit);
 

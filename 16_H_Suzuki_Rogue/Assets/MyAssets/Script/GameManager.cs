@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Completed;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -52,7 +51,6 @@ public class GameManager : MonoBehaviour
 
     static private void OnSceneLoaded(Scene arg0 ,LoadSceneMode arg1) 
     {
-        instance.level++;
         instance.InitGame();
     }
 
@@ -83,13 +81,33 @@ public class GameManager : MonoBehaviour
         doSetup = false;
 
     }
-
-    private void Update()
+    // プレイヤーの入力を判定してから敵の移動を行う
+    
+       public void Update()
     {
         if(doSetup|| playersTurn || enemiesMoving) { return; }
 
         StartCoroutine(MoveEnemies());
     }
+
+    public IEnumerator myUpdate() 
+    {
+        if(doSetup) { yield break; }
+        playersTurn = true;
+
+        enemiesMoving = true;
+
+        // プレイヤーの移動処理
+
+        // エネミーの移動処理
+        StartCoroutine(MoveEnemies());
+
+        //updateの終わり
+        playersTurn = false;
+        enemiesMoving= false;
+    }
+
+
 
     public void AddEnemyToList(Enemy _enemy) 
     {

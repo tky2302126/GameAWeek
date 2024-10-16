@@ -5,6 +5,8 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine.InputSystem;
+using Unity.VisualScripting;
+using UnityEngine.Windows;
 
 public enum InputType
 {
@@ -13,7 +15,7 @@ public enum InputType
 
 public class Player : absMove
 {
-
+    
     public float restartLevelDelay = 1f;
     public int pointPerFood = 10;
     public int wallDamage = 1;
@@ -23,9 +25,9 @@ public class Player : absMove
     private InputActionAsset _input;
     private Animator _anim;
     private int food;
+    private bool enterExit = false;
 
-
-    readonly int[] rowAxisMove =  { -1, 1, 0, 0 };
+    readonly int[] rowAxisMove =  { 1, -1, 0, 0 };
 
     readonly int[] columnAxisMove = {0,0,-1,1 };
 
@@ -44,38 +46,51 @@ public class Player : absMove
         _input.FindAction("Down").performed += RecieveInputDown;
         _input.FindAction("Left").performed += RecieveInputLeft;
         _input.FindAction("Right").performed += RecieveInputRight;
+        _input.Enable();
 
         base.Start();
     }
 
-    
-
     private void OnDisable()
     {
-        //次のフロアへフードの値を引き継ぐ
-        GameManager.instance.playerFoodPoints = food;
+        _input.FindAction("Up").performed -= RecieveInputUp;
+        _input.FindAction("Down").performed -= RecieveInputDown;
+        _input.FindAction("Left").performed -= RecieveInputLeft;
+        _input.FindAction("Right").performed -= RecieveInputRight;
+        _input.Disable();
+
     }
 
-   //myUpdateにして入力を受けたら呼び出すようにする
-   //2048から持ってくるとよさそう
+    //myUpdateにして入力を受けたら呼び出すようにする
+    //2048から持ってくるとよさそう
     void myUpdate(InputType input)
     {
         if (!GameManager.instance.playersTurn) { return; }
 
-        AttemptMove<Wall>(rowAxisMove[(int)input], columnAxisMove[(int)input]);
+        AttemptMove<Wall>( columnAxisMove[(int)input], rowAxisMove[(int)input]);
 
-
+        GameManager.instance.playersTurn = false;
     }
 
+    //! foodを消費する前に移動可能か調べる
    public override void AttemptMove<T>(int xDir,int yDir) 
     {
+        //動ける場合、foodを消費する
         food--;
 
         var text = "Food : " + food;
 
-        base.AttemptMove<T>(xDir, yDir);
+        _foodText.SetText(text);
+
+        base.AttemptMove<T>(xDir,yDir);
 
         RaycastHit2D hit;
+
+        // SE再生
+        if(Move(xDir,yDir,out hit)) 
+        {
+            
+        }
 
         CheckIsGameOver();
 
@@ -95,8 +110,7 @@ public class Player : absMove
     {
         if(other.tag == "Exit") 
         {
-            Invoke("Restart",restartLevelDelay);
-
+            StartCoroutine(Restart(restartLevelDelay));
             enabled = false;
         }
 
@@ -106,13 +120,26 @@ public class Player : absMove
 
             var text = "+" + pointPerFood + "Food : " + food;
 
+            _foodText.SetText(text);
+
             other.gameObject.SetActive(false);
         }
         
     }
 
-    private void Reset()
+    // levelとfoodの更新
+    private IEnumerator Restart(float delayTime)
     {
+        //次のフロアへフードの値を引き継ぐ
+        GameManager.instance.playerFoodPoints = food;
+
+        // なぜか２回呼ばれることがあるので設けた
+        if(!enterExit) 
+        {
+            ++GameManager.instance.level;
+            enterExit = true;
+        }
+        yield return new WaitForSeconds(delayTime);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
     }
 
@@ -135,6 +162,7 @@ public class Player : absMove
         }
     }
 
+    #region Inputsystem Callbacks
     private void RecieveInputUp(InputAction.CallbackContext context) 
     {
         myUpdate(InputType.Up);
@@ -152,5 +180,5 @@ public class Player : absMove
     {
         myUpdate(InputType.Right);
     }
-
+    #endregion
 }

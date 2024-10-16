@@ -38,7 +38,7 @@ public class BoardManager : MonoBehaviour
         {
             
         //! 大きく変える予定
-            BoardSetUp();
+            //BoardSetUp();
 
             InitList();
 
