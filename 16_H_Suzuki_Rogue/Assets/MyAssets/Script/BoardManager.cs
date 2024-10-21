@@ -1,26 +1,29 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
 public enum CELL
 {
     WALL,
-    ROUTE,
     FLOOR,
-    ROOM
+    CHILD,
+    ROOM,
+    OUTERWALL
 }
 public class BoardManager : MonoBehaviour
 {
     public class Count
     {
-        public int minmum;
+        public int minimum;
         public int maximum;
 
         public Count(int min, int max)
         {
-            this.minmum = min;
+            this.minimum = min;
             this.maximum = max;
         }
     }
@@ -42,6 +45,7 @@ public class BoardManager : MonoBehaviour
     private Transform boardHolder;
 
     private List<Vector3> emptyPositions = new List<Vector3>();
+    private List<Vector2Int> _emptyPositions =  new List<Vector2Int>();
 
     private CELL[,] map;
 
@@ -51,17 +55,17 @@ public class BoardManager : MonoBehaviour
         //! 大きく変える予定
             //BoardSetUp();
 
-            InitList();
+            GetEmptyPositions();
 
-            LayoutObjectAtRandom(_wall,wallCount.minmum,wallCount.maximum);
+            LayoutObjectAtRandom(_wall,wallCount.minimum,wallCount.maximum);
 
-            LayoutObjectAtRandom(_food,foodCount.minmum,foodCount.maximum);
+            LayoutObjectAtRandom(_food,foodCount.minimum,foodCount.maximum);
 
             Instantiate(_exit, new Vector3(columns - 1, rows - 1, 0), Quaternion.identity);
         }
 
         //1部屋だけのマップを作るスクリプト
-        void RoomSetUp() 
+    void RoomSetUp() 
         {
             boardHolder = new GameObject("Room").transform;
 
@@ -85,51 +89,72 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        void InitList() 
-        {
-            emptyPositions.Clear();
+    void GetEmptyPositions() 
+    {
+        emptyPositions.Clear();
 
-            for(int x = 1; x < columns - 1; x++) 
+        for(int x = 1; x < columns - 1; x++) 
+        {
+            for(int y = 1; y < rows - 1; y++) 
             {
-                for(int y = 1; y < rows - 1; y++) 
-                {
-                    emptyPositions.Add(new Vector3 (x, y, 0));
-                }
+                emptyPositions.Add(new Vector3 (x, y, 0));
             }
         }
+    }
 
-        Vector3 GetRandomPosition() 
+    void GetEmptyPositions(ref CELL[,] map) 
+    {
+        emptyPositions.Clear();
+
+        for(int x= 0; x< map.GetLength(0); x++) 
         {
-            var randomIndex = UnityEngine.Random.Range(0,emptyPositions.Count);
-
-            var randomPosition = emptyPositions[randomIndex];
-
-            emptyPositions.RemoveAt(randomIndex);
-
-            return randomPosition;
-        }
-
-        void LayoutObjectAtRandom(GameObject tile,int minimun ,int maxmum) 
-        {
-            int objectCount = UnityEngine.Random.Range (minimun,maxmum);
-
-            for(int i = 0; i < objectCount; i++) 
+            for(int y=0;y< map.GetLength(1); y++) 
             {
-                var randomPosition = GetRandomPosition();
-
-                Instantiate(tile, randomPosition, Quaternion.identity);
-            }
+                if (map[x,y] != CELL.WALL) { _emptyPositions.Add(new Vector2Int(x,y)); }
+            }        
         }
+    }
+
+    Vector3 GetRandomPosition() 
+    {
+        var randomIndex = UnityEngine.Random.Range(0,emptyPositions.Count);
+
+        var randomPosition = emptyPositions[randomIndex];
+
+        emptyPositions.RemoveAt(randomIndex);
+
+        return randomPosition;
+    }
+
+    void LayoutObjectAtRandom(GameObject tile,int minimun ,int maxmum) 
+    {
+        int objectCount = UnityEngine.Random.Range (minimun,maxmum);
+
+        for(int i = 0; i < objectCount; i++) 
+        {
+            var randomPosition = GetRandomPosition();
+
+            Instantiate(tile, randomPosition, Quaternion.identity);
+        }
+    }
+
+    void LayoutObjectAtRandom(GameObject tile) 
+    {
+        var randomPosition = GetRandomPosition();
+
+        Instantiate(tile, randomPosition, Quaternion.identity);
+    
+    }
 
     public void SetupScene(int level) 
     {
         RoomSetUp();
 
-        InitList();
+        GetEmptyPositions();
 
-        LayoutObjectAtRandom(_wall, wallCount.minmum, wallCount.maximum);
+        LayoutObjectAtRandom(_wall, wallCount.minimum, wallCount.maximum);
 
-        LayoutObjectAtRandom(_food,foodCount.minmum, foodCount.maximum);
+        LayoutObjectAtRandom(_food,foodCount.minimum, foodCount.maximum);
 
         int enemyCount = (int)Mathf.Log(level, 2f);
 
@@ -139,75 +164,96 @@ public class BoardManager : MonoBehaviour
         Instantiate(_exit,new Vector3(columns-1,rows-1), Quaternion.identity);
     }
 
+    public void SetUpScene(int width ,int Height,int level) 
+    {
+        //! マップの大きさによってセルオートマトンのループ数を調整する
+        // int iteration;
+
+        DungeonGenerate(Height,width,4);
+
+        GetEmptyPositions(ref map);
+
+        //! 壁や食料もマップの大きさによって数値を調整
+
+        LayoutObjectAtRandom(_wall, wallCount.minimum, wallCount.maximum);
+
+        LayoutObjectAtRandom(_food, foodCount.minimum, foodCount.maximum);
+
+        // ! 敵の実装(優先度:低)
+        //int enemyCount = (int)Mathf.Log(level, 2f);
+
+        //LayoutObjectAtRandom(_enemy1, enemyCount, enemyCount);
+
+        LayoutObjectAtRandom(_exit);
+
+    }
+
     // セルオートマトンを使ったダンジョン生成
     // 部屋のセルをランダムにまく
 
     public void DungeonGenerate(int rowSize,int colSize,int iteration) 
     {
         //! 二次元配列の順番が[x,y]
-        map = new CELL[colSize,rowSize];
+        map = new CELL[colSize+2,rowSize+2];
         
         InitGrid();
 
         RunCellAutomaton(iteration);
 
-        //いらなそう
-        var roomNum = CountRooms();
+        List<Vector2Int> rooms = GetRooms();
 
-        List<Vector2Int> roomCenters = GetRoomCenters();
+        ConnectRooms(rooms);
 
-        ConnectRooms(roomCenters);
-
-
-    }
+        DumpDungeon(map);
+    }  
 
     // 島同士をRouteでつなぐ(最短距離のもの同士)
     private void ConnectRooms(List<Vector2Int> roomCenters)
     {
-        throw new System.NotImplementedException();
+        for(int i=0; i<roomCenters.Count -1 ; i++) 
+        {
+            Vector2Int start = roomCenters[i];
+            Vector2Int end = roomCenters[i+1];
+
+            CreateCorridor(start, end);    
+        }
     }
     
-    private List<Vector2Int> GetRoomCenters()
+    private void CreateCorridor(Vector2Int start, Vector2Int end) 
     {
-        List<Vector2Int> RoomCenters = new List<Vector2Int>();
-        //探索済みか保存するコンテナ
-        bool[,] visited = new bool[map.GetLength(0), map.GetLength(1)];
+        for (int x = Mathf.Min(start.x, end.x); x <= Mathf.Max(start.x, end.x); x++) 
+        {
+            if (map[x,start.y] != CELL.ROOM) 
+            {
+                map[x,start.y] = CELL.FLOOR;
+            }
+        }
+
+        for (int y = Mathf.Min(start.y,end.y);y <= Mathf.Max(start.y,end.y);y++) 
+        {
+            if (map[end.x,y] != CELL.ROOM) 
+            {
+                map[end.x,y] = CELL.FLOOR;
+            }
+        }
+    }
+
+    private List<Vector2Int> GetRooms()
+    {
+        List<Vector2Int> Rooms = new List<Vector2Int>();
 
         for(int x=0; x < map.GetLength(0); x++) 
         {
             for(int y=0; y < map.GetLength(1); y++) 
             {
-                if (map[x,y] == CELL.ROOM && !visited[x, y]) 
+                if (map[x,y] == CELL.ROOM ) 
                 {
-                    Vector2Int center = FindRoomCenter(x, y, ref visited);
-                    RoomCenters.Add(center);
+                    Vector2Int room = new Vector2Int(x,y);
+                    Rooms.Add(room);
                 }
             }
         }
-
-        return RoomCenters;
-    }
-    // BFSを使った探索
-    private Vector2Int FindRoomCenter(int x, int y, ref bool[,] visited)
-    {
-        List<Vector2Int> RoomCells = new List<Vector2Int>();
-        Queue<Vector2Int> queue = new Queue<Vector2Int>();
-        queue.Enqueue(new Vector2Int(x, y));
-
-        //ValueTuple std::pairのように使えるやつ
-        (int, int)[] direction = { (-1, 0), (1, 0),(0, -1),(0, 1) };
-        //Tuple<int, int>[] Tdirection = { new Tuple<int, int>(-1, 0), new Tuple<int, int>(1, 0), new Tuple<int, int>(0, -1), new Tuple<int, int>(0, 1) };
-
-        while (queue.Count > 0) 
-        {
-            //dequeue で最初の要素を取り出す
-            Vector2 current = queue.Dequeue();
-            var crrX = current.x;
-            var crrY = current.y;
-
-        }
-
-        return new Vector2Int();
+        return Rooms;
     }
 
     private void RunCellAutomaton(int iteration)
@@ -216,14 +262,11 @@ public class BoardManager : MonoBehaviour
         {
             UpdateGrid();   
         }
+        //Debug.Log("before Finalize");
+        //DumpDungeon(map);
+
         // 最後に四方がwallのfloor,RoomはWallにする
         FinalaizeMap();
-    }
-
-    // Roomを数える(島を数えるアルゴリズム)
-    private int CountRooms()
-    {
-        throw new System.NotImplementedException();
     }
 
     // マップにランダムにセルをまく
@@ -231,14 +274,20 @@ public class BoardManager : MonoBehaviour
     {
         var height = map.GetLength(0);
         var width  = map.GetLength(1);
+
         for(int y=0; y < height; y++) 
         {
             for(int x=0; x < width; x++) 
             {
-                //適当に種をまく
-                map[x,y] = UnityEngine.Random.value <= 0.05f ? CELL.ROOM : CELL.WALL;
+                if(x>= 1 && y>= 1 && x<width-1 && y< height - 1) 
+                {
+                    //適当に種をまく
+                    map[x, y] = UnityEngine.Random.value <= 0.03f ? CELL.ROOM : CELL.WALL;
+                }
+                else { map[x, y] = CELL.OUTERWALL; }
             }
         }
+        
     }
 
     int CountWallNeighbors(ref int[,] grid,int row,int col) 
@@ -300,7 +349,10 @@ public class BoardManager : MonoBehaviour
             // Room ->周囲のマスをRoomかFloorに変える
             // 変えた先のマスがすでにFloorだった場合、Roomにしない
             case CELL.ROOM:
+                ChangeSurrondCells(x, y);
+                break;
 
+            case CELL.CHILD:
                 ChangeSurrondCells(x, y);
                 break;
 
@@ -337,26 +389,142 @@ public class BoardManager : MonoBehaviour
             if(!CheckInBounds(newCol, newRow)) { continue; }
             // Floor,Roomのセルは更新しない
             if (map[newCol, newRow] == CELL.FLOOR|| map[newCol,newRow] == CELL.ROOM) continue;
-            // 25%でRoomにする
-            map[newCol,newRow] = UnityEngine.Random.value <= 0.25 ? CELL.ROOM : CELL.FLOOR;
+            // OUTERWALL
+            if (map[newCol,newRow] == CELL.OUTERWALL) continue;
+            // 25%でChildにする
+            // Roomにすると部屋を無駄に数える
+            map[newCol,newRow] = UnityEngine.Random.value <= 0.25 ? CELL.CHILD : CELL.FLOOR;
             
         }
     }
 
     private void FinalaizeMap()
     {
+        bool[,] visited = new bool[map.GetLength(0),map.GetLength(1)];
+
         for(int x = 0; x < map.GetLength(0); x++) 
         {
             for(int y=0; y<map.GetLength(1); y++) 
             {
+                if (visited[x, y] == true) continue;
+
+                // childはfloorにする
+                if (map[x, y] == CELL.CHILD) { map[x, y] = CELL.FLOOR; }
+                // OuterWallはWallに
+                if (map[x,y] == CELL.OUTERWALL) { map[x,y] = CELL.WALL; }
+
                 if (map[x,y]==CELL.FLOOR || map[x, y] == CELL.ROOM) 
                 {
+                    
+                    // 1マスの場合はこれで閉じるが、
+                    // ふさがった通路マスは閉じない
                     if (IsSurroundedByWalls(x, y)) 
                     {
                         map[x, y] = CELL.WALL;
+                    }                    
+                }
+
+                visited[x, y] = true;
+            }
+        }
+
+        CheckRoom(ref map);
+    }
+
+    // BFSでRoomを探索し、
+    // roomがなければ埋める
+    private void CheckRoom(int x, int y, ref CELL[,] map,ref bool[,] visited)
+    {
+        bool FindOutRoom = false;
+
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        List<Vector2Int> Cells = new List<Vector2Int>();
+        (int, int)[] directions = { (-1,0),(1,0),(0,-1),(0,1) };
+        visited[x,y] = true;
+        Cells.Add(new Vector2Int(x,y));
+        queue.Enqueue(new Vector2Int(x,y));
+
+        while (queue.Count>0) 
+        {
+            var crrPos = queue.Dequeue();
+            if (map[crrPos.x,crrPos.y] == CELL.ROOM) { FindOutRoom = true; break; }
+
+            foreach (var dir in directions)
+            {
+                var nextX = crrPos.x+ dir.Item1;
+                var nextY = crrPos.y+ dir.Item2;
+
+                if (!CheckInBounds(nextX, nextY)) continue;
+                if (visited[nextX,nextY]) continue;
+                if (map[nextX,nextY] == CELL.WALL) continue;
+
+                queue.Enqueue(new Vector2Int(nextX,nextY));
+                Cells.Add(new Vector2Int(nextX, nextY));
+                visited[nextX,nextY] = true;
+            }
+        }
+
+        if(FindOutRoom == false) { FillRoom(Cells); }
+    }
+
+    private void CheckRoom(ref CELL[,] map) 
+    {
+        var width = map.GetLength(0);
+        var height = map.GetLength(1);
+
+        (int, int)[] directions = { (-1, 0), (1, 0), (0, -1), (0, 1) };
+
+        bool[,] visited = new bool[width, height];
+
+        for(int x = 0; x < width; x++) 
+        {
+            for(int y = 0; y < height; y++) 
+            {
+                if (!visited[x,y] && map[x,y] != CELL.WALL) 
+                {
+                    List<Vector2Int> regionCells = new List<Vector2Int>();
+                    Queue<Vector2Int> queue = new Queue<Vector2Int>();
+                    bool containsRoom = false;
+
+                    queue.Enqueue(new Vector2Int(x, y));
+                    visited[x,y] = true;
+
+                    while(queue.Count > 0) 
+                    {
+                        Vector2Int crrPos = queue.Dequeue();
+                        regionCells.Add(crrPos);
+
+                        if (map[crrPos.x,crrPos.y] == CELL.ROOM) 
+                        {
+                            containsRoom = true;
+                        }
+
+                        foreach (var dir in directions)
+                        {
+                            int nextX = crrPos.x+dir.Item1;
+                            int nextY = crrPos.y+dir.Item2;
+
+                            if(!CheckInBounds(nextX, nextY)) { continue; }
+                            if(visited[nextX,nextY]) { continue; }
+                            if(map[nextX,nextY] == CELL.WALL || map[nextX,nextY] == CELL.OUTERWALL) {  continue; }
+                            queue.Enqueue(new Vector2Int(nextX, nextY));
+                            visited[nextX,nextY] = true;
+                        }
                     }
+
+                    if(!containsRoom) { FillRoom(regionCells); }
+
                 }
             }
+        }
+
+    }
+
+    private void FillRoom(List<Vector2Int> cells)
+    {
+        foreach (var Vector2 in cells)
+        {
+            map[Vector2.x, Vector2.y] = CELL.WALL;
         }
     }
 
@@ -376,7 +544,7 @@ public class BoardManager : MonoBehaviour
 
             if(CheckInBounds(newX, newY)) 
             {
-                if (map[newX,newY] == CELL.WALL) { wallCount++; }
+                if (map[newX,newY] == CELL.WALL || map[newX, newY] == CELL.OUTERWALL) { wallCount++; }
             }
             else 
             {
@@ -390,9 +558,23 @@ public class BoardManager : MonoBehaviour
     }
 
     //生成されたマップをコンソールログに表示する
-    public void DumpDungeon() 
+    public void DumpDungeon(CELL[,] map) 
     {
-        
+        StringBuilder sb = new StringBuilder();
+
+        for(int x = 0; x < map.GetLength(0); x++) 
+        {
+            for(int y = 0; y < map.GetLength(1); y++) 
+            {
+                if (map[x,y] == CELL.WALL) { sb.Append("#"); }
+                if (map[x,y] == CELL.ROOM) { sb.Append("R"); }
+                if (map[x,y] == CELL.FLOOR) { sb.Append(" "); }
+            }
+
+            sb.AppendLine();
+        }
+
+        Debug.Log(sb.ToString());
     }
 }
 

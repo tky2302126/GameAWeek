@@ -25,6 +25,14 @@ public class GameManager : MonoBehaviour
     private bool enemiesMoving;
     private bool doSetup;
 
+    private Button _debugButton;
+    [SerializeField]
+    private int testRow = 20;
+    [SerializeField]
+    private int testCol = 20;
+    [SerializeField]
+    private int testIteration = 4;
+
     //シングルトン設計
     private void Awake()
     {
@@ -39,8 +47,23 @@ public class GameManager : MonoBehaviour
 
         DontDestroyOnLoad(gameObject);
         enemies = new List<Enemy>();
-        InitGame();
+        //イニシャライズは1度でいいので一旦コメントアウト
+        //InitGame();
     }
+
+    #region ダンジョンデバッグ
+    //private void Start()
+    //{
+    //    _debugButton = GameObject.Find("Button(Debug)").GetComponent<Button>();
+    //    _debugButton.onClick.AddListener(DebugDungeon);
+    //}
+
+    //void DebugDungeon() 
+    //{
+    //    _board?.DungeonGenerate(testRow, testCol, testIteration);
+    //}
+
+    #endregion
 
     //シーンロード後に１度だけ呼び出す
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
