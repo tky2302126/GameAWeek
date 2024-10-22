@@ -42,69 +42,67 @@ public class BoardManager : MonoBehaviour
     public GameObject _enemy1;
     public GameObject _food;
 
-    private Transform boardHolder;
+    private GameObject boardHolder;
+    private GameObject itemHolder;
 
     private List<Vector3> emptyPositions = new List<Vector3>();
     private List<Vector2Int> _emptyPositions =  new List<Vector2Int>();
 
     private CELL[,] map;
+    private GameObject _player;
 
         void Start() 
         {
             
-        //! 大きく変える予定
-            //BoardSetUp();
-
-            GetEmptyPositions();
-
-            LayoutObjectAtRandom(_wall,wallCount.minimum,wallCount.maximum);
-
-            LayoutObjectAtRandom(_food,foodCount.minimum,foodCount.maximum);
-
-            Instantiate(_exit, new Vector3(columns - 1, rows - 1, 0), Quaternion.identity);
         }
 
-        //1部屋だけのマップを作るスクリプト
-    void RoomSetUp() 
-        {
-            boardHolder = new GameObject("Room").transform;
+    //1部屋だけのマップを作るスクリプト
+    //void RoomSetUp() 
+    //    {
+    //        boardHolder = new GameObject("Room").transform;
 
-            for(int x = -1;x<columns+1; x++) 
-            {
-                for(int y = -1;y<rows+1; y++) 
-                {
-                    GameObject toInstantuate = _floor;
+    //        for(int x = -1;x<columns+1; x++) 
+    //        {
+    //            for(int y = -1;y<rows+1; y++) 
+    //            {
+    //                GameObject toInstantuate = _floor;
 
-                    if(x == -1|| y == -1 || x== columns || y == rows) 
-                    {
-                        toInstantuate = _outerWall;
-                    }
+    //                if(x == -1|| y == -1 || x== columns || y == rows) 
+    //                {
+    //                    toInstantuate = _outerWall;
+    //                }
 
-                    var instance = 
-                        Instantiate(toInstantuate, new Vector3(x, y, 0), Quaternion.identity) 
-                        as GameObject;
-                    
-                    instance.transform.SetParent(boardHolder);
-                }
-            }
-        }
+    //                var instance = 
+    //                    Instantiate(toInstantuate, new Vector3(x, y, 0), Quaternion.identity) 
+    //                    as GameObject;
 
-    void GetEmptyPositions() 
+    //                instance.transform.SetParent(boardHolder);
+    //            }
+    //        }
+    //    }
+
+    //void GetEmptyPositions() 
+    //{
+    //    emptyPositions.Clear();
+
+    //    for(int x = 1; x < columns - 1; x++) 
+    //    {
+    //        for(int y = 1; y < rows - 1; y++) 
+    //        {
+    //            emptyPositions.Add(new Vector3 (x, y, 0));
+    //        }
+    //    }
+    //}
+
+    public void ResetMapData()
     {
-        emptyPositions.Clear();
-
-        for(int x = 1; x < columns - 1; x++) 
-        {
-            for(int y = 1; y < rows - 1; y++) 
-            {
-                emptyPositions.Add(new Vector3 (x, y, 0));
-            }
-        }
+        if(itemHolder != null) { Destroy(itemHolder.gameObject); }
+        if(boardHolder != null) { Destroy(boardHolder.gameObject); }
     }
 
     void GetEmptyPositions(ref CELL[,] map) 
     {
-        emptyPositions.Clear();
+        _emptyPositions.Clear();
 
         for(int x= 0; x< map.GetLength(0); x++) 
         {
@@ -117,52 +115,66 @@ public class BoardManager : MonoBehaviour
 
     Vector3 GetRandomPosition() 
     {
-        var randomIndex = UnityEngine.Random.Range(0,emptyPositions.Count);
+        var randomIndex = UnityEngine.Random.Range(0,_emptyPositions.Count-1);
 
-        var randomPosition = emptyPositions[randomIndex];
+        Vector3 randomPosition = new Vector3(_emptyPositions[randomIndex].x, _emptyPositions[randomIndex].y, 0);
 
-        emptyPositions.RemoveAt(randomIndex);
+        _emptyPositions.RemoveAt(randomIndex);
 
         return randomPosition;
     }
 
     void LayoutObjectAtRandom(GameObject tile,int minimun ,int maxmum) 
     {
+        if(itemHolder == null) 
+        {
+            itemHolder = new GameObject("ITEM");
+        }
+
         int objectCount = UnityEngine.Random.Range (minimun,maxmum);
 
         for(int i = 0; i < objectCount; i++) 
         {
             var randomPosition = GetRandomPosition();
 
+            var instance =
             Instantiate(tile, randomPosition, Quaternion.identity);
+            instance.transform.SetParent(itemHolder.transform);
         }
     }
 
     void LayoutObjectAtRandom(GameObject tile) 
     {
+        if (itemHolder == null)
+        {
+            itemHolder = new GameObject("ITEM");
+        }
+
         var randomPosition = GetRandomPosition();
-
+        var instance =
         Instantiate(tile, randomPosition, Quaternion.identity);
-    
+        instance.transform.SetParent(itemHolder.transform);
+
     }
+    #region アセットのスクリプト  
+    //public void SetupScene(int level) 
+    //{
+    //    RoomSetUp();
 
-    public void SetupScene(int level) 
-    {
-        RoomSetUp();
+    //    GetEmptyPositions();
 
-        GetEmptyPositions();
+    //    LayoutObjectAtRandom(_wall, wallCount.minimum, wallCount.maximum);
 
-        LayoutObjectAtRandom(_wall, wallCount.minimum, wallCount.maximum);
+    //    LayoutObjectAtRandom(_food,foodCount.minimum, foodCount.maximum);
 
-        LayoutObjectAtRandom(_food,foodCount.minimum, foodCount.maximum);
+    //    int enemyCount = (int)Mathf.Log(level, 2f);
 
-        int enemyCount = (int)Mathf.Log(level, 2f);
+    //    LayoutObjectAtRandom(_enemy1, enemyCount, enemyCount);
 
-        LayoutObjectAtRandom(_enemy1, enemyCount, enemyCount);
-
-        // !出口はemptypositionのどこかに置く
-        Instantiate(_exit,new Vector3(columns-1,rows-1), Quaternion.identity);
-    }
+    //    // !出口はemptypositionのどこかに置く
+    //    Instantiate(_exit,new Vector3(columns-1,rows-1), Quaternion.identity);
+    //}
+    #endregion
 
     public void SetUpScene(int width ,int Height,int level) 
     {
@@ -172,6 +184,8 @@ public class BoardManager : MonoBehaviour
         DungeonGenerate(Height,width,4);
 
         GetEmptyPositions(ref map);
+
+        SetMapTip(ref map);
 
         //! 壁や食料もマップの大きさによって数値を調整
 
@@ -186,11 +200,47 @@ public class BoardManager : MonoBehaviour
 
         LayoutObjectAtRandom(_exit);
 
+        _player = GameObject.Find("Player");
+
+        LayoutPlayerAtRandom(_player);
+
+
+    }
+
+    private void LayoutPlayerAtRandom(GameObject player)
+    {
+        var randomIndex = UnityEngine.Random.Range(0, _emptyPositions.Count - 1);
+
+        var randomPosition = _emptyPositions[randomIndex];
+
+        _emptyPositions.RemoveAt(randomIndex);
+
+        _player.transform.position = new Vector3(randomPosition.x, randomPosition.y, 0);
+    }
+
+    private void SetMapTip(ref CELL[,] map)
+    {
+        boardHolder = new GameObject("MAP");
+        for(int x = 0; x < map.GetLength(0); x++) 
+        {
+            for(int y = 0; y < map.GetLength(1); y++) 
+            {
+                GameObject toInstantiate = _floor;
+                if (map[x,y] == CELL.WALL) 
+                {
+                    toInstantiate = _outerWall;
+                }
+
+                var instance =
+                    Instantiate(toInstantiate,new Vector3(x,y,0),Quaternion.identity);
+
+                instance.transform.SetParent(boardHolder.transform);
+            }
+        }
     }
 
     // セルオートマトンを使ったダンジョン生成
     // 部屋のセルをランダムにまく
-
     public void DungeonGenerate(int rowSize,int colSize,int iteration) 
     {
         //! 二次元配列の順番が[x,y]
@@ -203,8 +253,9 @@ public class BoardManager : MonoBehaviour
         List<Vector2Int> rooms = GetRooms();
 
         ConnectRooms(rooms);
-
+#if UNITY_EDITOR
         DumpDungeon(map);
+#endif
     }  
 
     // 島同士をRouteでつなぐ(最短距離のもの同士)
@@ -272,8 +323,8 @@ public class BoardManager : MonoBehaviour
     // マップにランダムにセルをまく
     private void InitGrid() 
     {
-        var height = map.GetLength(0);
-        var width  = map.GetLength(1);
+        var width  = map.GetLength(0);
+        var height = map.GetLength(1);
 
         for(int y=0; y < height; y++) 
         {
@@ -433,40 +484,6 @@ public class BoardManager : MonoBehaviour
 
     // BFSでRoomを探索し、
     // roomがなければ埋める
-    private void CheckRoom(int x, int y, ref CELL[,] map,ref bool[,] visited)
-    {
-        bool FindOutRoom = false;
-
-        Queue<Vector2Int> queue = new Queue<Vector2Int>();
-        List<Vector2Int> Cells = new List<Vector2Int>();
-        (int, int)[] directions = { (-1,0),(1,0),(0,-1),(0,1) };
-        visited[x,y] = true;
-        Cells.Add(new Vector2Int(x,y));
-        queue.Enqueue(new Vector2Int(x,y));
-
-        while (queue.Count>0) 
-        {
-            var crrPos = queue.Dequeue();
-            if (map[crrPos.x,crrPos.y] == CELL.ROOM) { FindOutRoom = true; break; }
-
-            foreach (var dir in directions)
-            {
-                var nextX = crrPos.x+ dir.Item1;
-                var nextY = crrPos.y+ dir.Item2;
-
-                if (!CheckInBounds(nextX, nextY)) continue;
-                if (visited[nextX,nextY]) continue;
-                if (map[nextX,nextY] == CELL.WALL) continue;
-
-                queue.Enqueue(new Vector2Int(nextX,nextY));
-                Cells.Add(new Vector2Int(nextX, nextY));
-                visited[nextX,nextY] = true;
-            }
-        }
-
-        if(FindOutRoom == false) { FillRoom(Cells); }
-    }
-
     private void CheckRoom(ref CELL[,] map) 
     {
         var width = map.GetLength(0);

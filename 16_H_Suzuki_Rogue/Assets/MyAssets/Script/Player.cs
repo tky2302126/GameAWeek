@@ -7,6 +7,7 @@ using TMPro;
 using UnityEngine.InputSystem;
 using Unity.VisualScripting;
 using UnityEngine.Windows;
+using System;
 
 public enum InputType
 {
@@ -31,15 +32,23 @@ public class Player : absMove
 
     readonly int[] columnAxisMove = {0,0,-1,1 };
 
+    readonly int INF = (int)Math.Exp(5);
+
     protected override void Start()
     {
        _anim = GetComponent<Animator>();
 
         //scriptableObjectに置き換えできそう
         food = GameManager.instance.playerFoodPoints;
+#if UNITY_EDITOR
+       // food = 10;
+#endif
 
         var text = "Food : " + food;
-
+        if(_foodText == null) 
+        {
+            _foodText = GameObject.Find("FoodText").GetComponent<TextMeshProUGUI>();
+        }
         _foodText.SetText(text);
 
         _input.FindAction("Up").performed += RecieveInputUp;
@@ -77,7 +86,10 @@ public class Player : absMove
     {
         //動ける場合、foodを消費する
         food--;
-
+        if (_foodText == null)
+        {
+            _foodText = GameObject.Find("FoodText").GetComponent<TextMeshProUGUI>();
+        }
         var text = "Food : " + food;
 
         _foodText.SetText(text);
@@ -140,7 +152,9 @@ public class Player : absMove
             enterExit = true;
         }
         yield return new WaitForSeconds(delayTime);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
+        //! シーンをリロードするのは効率が悪い
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex,LoadSceneMode.Single);
+        GameManager.instance.ReloadScene();
     }
 
     public void LoseFood(int loss) 
