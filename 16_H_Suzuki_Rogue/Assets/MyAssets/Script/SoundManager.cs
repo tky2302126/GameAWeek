@@ -20,6 +20,7 @@ public enum SE
     Fruit2,
     Soda1,
     Soda2,
+    Stair,
     ALL
 }
 

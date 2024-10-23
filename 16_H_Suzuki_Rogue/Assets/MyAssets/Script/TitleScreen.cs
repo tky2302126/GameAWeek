@@ -7,9 +7,9 @@ public class TitleScreen : MonoBehaviour
 {
     private void Start()
     {
+        int ScreenWidth = Screen.width;
         int ScreenHeight = Screen.height;
-        int ScreenWidth = (int)(ScreenHeight *(16/9));
-        Screen.SetResolution(ScreenWidth, ScreenHeight,false);
+        Screen.SetResolution(ScreenWidth,ScreenHeight,false);
     }
     public void OnSceneChange() 
     {

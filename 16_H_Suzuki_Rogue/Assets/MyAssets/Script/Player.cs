@@ -8,6 +8,7 @@ using UnityEngine.InputSystem;
 using Unity.VisualScripting;
 using UnityEngine.Windows;
 using System;
+using Random = UnityEngine.Random;
 
 public enum InputType
 {
@@ -19,6 +20,7 @@ public class Player : absMove
     
     public float restartLevelDelay = 1f;
     public int pointPerFood = 10;
+    public int pointPerSoda = 30;
     public int wallDamage = 1;
     public TextMeshProUGUI _foodText;
 
@@ -28,11 +30,15 @@ public class Player : absMove
     private int food;
     private bool enterExit = false;
 
+    private int footSteps = 0;
+
     readonly int[] rowAxisMove =  { 1, -1, 0, 0 };
 
     readonly int[] columnAxisMove = {0,0,-1,1 };
 
     readonly int INF = (int)Math.Exp(5);
+
+    private bool turnLeft = false;
 
     protected override void Start()
     {
@@ -41,15 +47,10 @@ public class Player : absMove
         //scriptableObjectに置き換えできそう
         food = GameManager.instance.playerFoodPoints;
 #if UNITY_EDITOR
-       // food = 10;
+        // food = 10;
 #endif
 
-        var text = "Food : " + food;
-        if(_foodText == null) 
-        {
-            _foodText = GameObject.Find("FoodText").GetComponent<TextMeshProUGUI>();
-        }
-        _foodText.SetText(text);
+        SetupFoodText();
 
         _input.FindAction("Up").performed += RecieveInputUp;
         _input.FindAction("Down").performed += RecieveInputDown;
@@ -68,6 +69,16 @@ public class Player : absMove
         _input.FindAction("Right").performed -= RecieveInputRight;
         _input.Disable();
 
+    }
+
+    public void SetupFoodText() 
+    {
+        var text = "Food : " + food;
+        if (_foodText == null)
+        {
+            _foodText = GameObject.Find("FoodText").GetComponent<TextMeshProUGUI>();
+        }
+        _foodText.SetText(text);
     }
 
     //myUpdateにして入力を受けたら呼び出すようにする
@@ -99,9 +110,12 @@ public class Player : absMove
         RaycastHit2D hit;
 
         // SE再生
-        if(Move(xDir,yDir,out hit)) 
+        //if(Move(xDir,yDir,out hit)) 
         {
-            
+            footSteps++;
+            var se = footSteps % 2 == 0 ? SE.FootStep1 : SE.FootStep2;
+            SoundManager.Instance.PlaySE(se);
+            Debug.Log("Walk SE Played");
         }
 
         CheckIsGameOver();
@@ -116,6 +130,10 @@ public class Player : absMove
         hitWall.DamageWall(wallDamage);
 
         _anim.SetTrigger("attack");
+
+        var se = Random.value >= 0.5 ? SE.Attack1 : SE.Attack2;
+
+        SoundManager.Instance.PlaySE(se);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -123,7 +141,10 @@ public class Player : absMove
         if(other.tag == "Exit") 
         {
             StartCoroutine(Restart(restartLevelDelay));
+
             enabled = false;
+
+            SoundManager.Instance.PlaySE(SE.Stair);
         }
 
         else if(other.tag == "Food") 
@@ -135,6 +156,24 @@ public class Player : absMove
             _foodText.SetText(text);
 
             other.gameObject.SetActive(false);
+
+            var se = Random.value <= 5.0? SE.Fruit1 : SE.Fruit2;
+
+            SoundManager.Instance.PlaySE(se);
+        }
+        else if(other.tag == "Soda") 
+        {
+            food += pointPerSoda;
+
+            var text = "+" + pointPerSoda + "Food : " + food;
+
+            _foodText.SetText(text);
+
+            other.gameObject.SetActive(false);
+
+            var se = Random.value <= 5.0 ? SE.Soda1 : SE.Soda2;
+
+            SoundManager.Instance.PlaySE(se);
         }
         
     }
@@ -153,7 +192,6 @@ public class Player : absMove
         }
         yield return new WaitForSeconds(delayTime);
         //! シーンをリロードするのは効率が悪い
-        //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex,LoadSceneMode.Single);
         GameManager.instance.ReloadScene();
     }
 
@@ -172,6 +210,7 @@ public class Player : absMove
     {
         if(food <= 0) 
         {
+            SoundManager.Instance.PlaySE(SE.Die);
             GameManager.instance.GameOver();
         }
     }
@@ -188,11 +227,21 @@ public class Player : absMove
     }
     private void RecieveInputLeft(InputAction.CallbackContext context)
     {
+        if (!turnLeft) 
+        {
+            turnLeft = true;
+            this.transform.localScale = new Vector3(-1, 1, 1); 
+        }
         myUpdate(InputType.Left);
     }
     private void RecieveInputRight(InputAction.CallbackContext context)
     {
         myUpdate(InputType.Right);
+        if(turnLeft) 
+        {
+            turnLeft = false;
+            this.transform.localScale = new Vector3(1, 1, 1);
+        }
     }
     #endregion
 }

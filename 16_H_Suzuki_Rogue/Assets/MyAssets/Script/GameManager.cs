@@ -34,6 +34,8 @@ public class GameManager : MonoBehaviour
 
     private Canvas _canvas;
 
+    private Player _player;
+
     #region ダンジョンテスト
 
     //private Button _debugButton;
@@ -140,6 +142,12 @@ public class GameManager : MonoBehaviour
         enemies.Clear();
 
         _board.SetUpScene(crrWidth, crrHeight, level);
+
+        if(_player == null) 
+        {
+            _player = GameObject.Find("Player").GetComponent<Player>();
+            _player?.SetupFoodText();
+        }
     }
 
     public IEnumerator HideImage(float duration)
@@ -218,6 +226,8 @@ public class GameManager : MonoBehaviour
     {
         level = firstlevel;
         playerFoodPoints = firstPlayerFP;
+        _gameOver.transform.DOLocalMove(new Vector3(0, -450, 0), 0.1f);
+        enabled =true;
         ReloadScene();
     }
 

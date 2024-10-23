@@ -28,11 +28,9 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public int columns = 8;
-    public int rows = 8;
-
     public Count wallCount = new Count(3, 9);
     public Count foodCount = new Count(1, 5);
+    public Count sodaCount = new Count(0, 3);
 
 
     public GameObject _exit;
@@ -41,6 +39,7 @@ public class BoardManager : MonoBehaviour
     public GameObject _outerWall;
     public GameObject _enemy1;
     public GameObject _food;
+    public GameObject _soda;
 
     private GameObject boardHolder;
     private GameObject itemHolder;
@@ -51,10 +50,6 @@ public class BoardManager : MonoBehaviour
     private CELL[,] map;
     private GameObject _player;
 
-        void Start() 
-        {
-            
-        }
 
     //1部屋だけのマップを作るスクリプト
     //void RoomSetUp() 
