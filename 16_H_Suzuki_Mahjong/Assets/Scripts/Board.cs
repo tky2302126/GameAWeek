@@ -8,6 +8,7 @@ namespace ShisenSho
     {
         public GameObject tilePrefab;
         public Transform board;
+        public RectTransform TileHolder;
 
         private List<ShisenSho.Tile> tiles = new List<Tile>();
         private List<GameObject> tileObjList = new List<GameObject>();
@@ -23,6 +24,13 @@ namespace ShisenSho
             //ShuffleTile();
         }
 
+        void RegistTile(GameObject _tileObj) 
+        {
+            _tileObj.transform.parent = TileHolder;
+            _tileObj.transform.localScale = Vector3.one;
+            tileObjList.Add(_tileObj);
+        }
+
         void GenerateTiles() 
         {
             // êîîv
@@ -36,12 +44,12 @@ namespace ShisenSho
                         var tile = tileObject.GetComponent<Tile>();
                         if(tile != null) 
                         {
-                            tile = new Tile(suit, rank);
+                            tile.Init(suit, rank);
                             var index = ((int)suit * 9) + ((int)rank-1); // Rank.One = 1
                             tile.SetImage(index);
                             
                         }
-                        tileObjList.Add(tileObject);
+                        RegistTile(tileObject);
                     }
                 }
             }
@@ -57,11 +65,11 @@ namespace ShisenSho
                     var tile = tileObject.GetComponent<Tile>();
                     if (tile != null)
                     {
-                        tile = new Tile(suit, rank);
+                        tile .Init(suit, rank);
                         var index = ((int) suit*9) + ((int) rank-11); // Rank.East = 11
                         tile.SetImage(index);
                     }
-                    tileObjList.Add(tileObject);
+                    RegistTile(tileObject);
                 }                
             }
             

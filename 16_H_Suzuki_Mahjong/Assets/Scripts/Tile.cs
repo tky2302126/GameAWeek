@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ShisenSho 
 {
@@ -42,7 +44,10 @@ namespace ShisenSho
         public Rank Rank { get; private set; }
 
         [SerializeField]
-        private SpriteRenderer spriteRenderer;
+        private Image image;
+
+        [SerializeField]
+        private TileImage images;
 
         public Tile(Suit _suit, Rank _rank)
         {
@@ -50,20 +55,17 @@ namespace ShisenSho
             Rank = _rank;
         }
 
-        [SerializeField]
-        private TileImage images;
+        public void Init(Suit _suit, Rank _rank) 
+        {
+            Suit = _suit;
+            Rank = _rank;
+        }
+
+        
 
         public void SetImage(int  index) 
         {
-            if(spriteRenderer != null) 
-            {
-                spriteRenderer.sprite = images.sprites[index];
-            }
-            else 
-            {
-                spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-                spriteRenderer.sprite = images.sprites[index];
-            }
+            image.sprite = images.sprites[index];
         }
 
 
