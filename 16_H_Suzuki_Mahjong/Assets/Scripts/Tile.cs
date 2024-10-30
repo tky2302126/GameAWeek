@@ -6,6 +6,12 @@ using UnityEngine.UI;
 
 namespace ShisenSho 
 {
+    public enum State 
+    {
+        None,
+        IsAlive,
+        Selected
+    }
     public enum Suit
     {
         Manzu,
@@ -43,6 +49,9 @@ namespace ShisenSho
         public Suit Suit { get; private set; }
         public Rank Rank { get; private set; }
 
+        public State State { get; private set; } = State.None;
+
+
         [SerializeField]
         private Image image;
 
@@ -59,16 +68,17 @@ namespace ShisenSho
         {
             Suit = _suit;
             Rank = _rank;
-        }
-
-        
+        }     
 
         public void SetImage(int  index) 
         {
             image.sprite = images.sprites[index];
         }
 
-
+        public void SetState(State state) 
+        {
+            State = state;
+        }
     }
 }
 
