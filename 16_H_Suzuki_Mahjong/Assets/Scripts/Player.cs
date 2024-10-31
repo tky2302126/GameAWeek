@@ -117,8 +117,16 @@ namespace ShisenSho
                         tile1.SetState(State.None);
                         var tile2 = selectedTile2.GetComponent<Tile>();
                         tile2.SetState(State.None);
-                        selectedTile1.SetActive(false);
-                        selectedTile2.SetActive(false);
+                        var image1 = selectedTile1.GetComponent<Image>();
+                        var image2 = selectedTile2.GetComponent<Image>();
+                        var boxcollider1 = tile1.GetComponent<BoxCollider2D>();
+                        var boxcollider2 = tile2.GetComponent<BoxCollider2D>();
+                        image1.enabled = false;
+                        image2.enabled = false;
+                        boxcollider1.enabled = false;
+                        boxcollider2.enabled = false;
+                        //selectedTile1.SetActive(false);
+                        //selectedTile2.SetActive(false);
 
                         //　手詰まりかどうかチェックして。
 
@@ -175,57 +183,72 @@ namespace ShisenSho
                 }
             }
 
-        private void IsStuckCheck()
+        public void IsStuckCheck()
         {
             List<GameObject> matchingList  = new List<GameObject>();
-            HashSet<Tile> processedTiles = new HashSet<Tile>();
+            HashSet<GameObject> processedTiles = new HashSet<GameObject>();
 
-            for(int y = 0; y < Board.TileArray.GetLength(0); y++) 
+            for(int y = 0; y < Board.TileArray.GetLength(1)-1; y++) 
             {
-                for(int x = 0; x< Board.TileArray.GetLength(1); x++) 
+                for(int x = 0; x< Board.TileArray.GetLength(0)-1; x++) 
                 {
-                    var crrTile = Board.TileArray[y, x];
-                    if(crrTile.State == State.None || crrTile == null) 
+                    //Vector2Int buff = new(Board.TileArray.GetLength(0), Board.TileArray.GetLength(1));
+                    try { if (Board.TileArray[x, y] == null) { continue; } }
+
+                    catch 
+                    {
+                        Vector2Int buff = new(x, y);
+                        Debug.Log(buff);
+                    }
+                    
+                    if (Board.TileArray[x, y].gameObject == null) { continue; }
+                    var crrTileObj = Board.TileArray[x, y].gameObject;
+                    var crrTile = crrTileObj.GetComponent<Tile>();
+                    if(crrTile.State == State.None ) 
                     {
                         continue;
                     }
-                    if(processedTiles.Contains(crrTile)) { continue; }
+                    if(processedTiles.Contains(crrTileObj)) { continue; }
+                    if(crrTileObj.gameObject == null) { continue; }
 
                     foreach (var other in Board.TileArray ) 
                     {
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        ///
-                        /// https://x.gd/USf8w <= これの途中
-                        ///
+                        if( other == crrTileObj ) { continue; }
+                        if(other == null) { continue; }
+                        if(other.gameObject == null) { continue; }
+                        if(other.State == State.None ) { continue; }
+                        if (IsMatchingPair(crrTileObj.gameObject,other.gameObject ))
+                        {
+                            matchingList.Add(crrTileObj);
+                            matchingList.Add(other.gameObject);
+
+                            processedTiles.Add(crrTileObj);
+                            processedTiles.Add(other.gameObject);
+
+                            //? State変更処理 いるか確認
+                        }
+                        else 
+                        {
+                            //? State変更処理 いるか確認
+                        }
                     }
 
                 }
             }
+
+            if(matchingList.Count > 0) { isStucked = false; }
+            else { isStucked = true; }
+            matchingList.Clear();
+            processedTiles.Clear();
         }
 
         private bool IsMatchingPair(GameObject selectedTile1, GameObject selectedTile2)
         {
             var result = false;
-
+            var tile1 = selectedTile1.GetComponent<Tile>();
+            var tile2 = selectedTile2.GetComponent<Tile>();
             // 経路探索
-            if (IsMatchingPaiInfo()) 
+            if (IsMatchingPaiInfo(tile1,tile2)) 
             {
                 index1 = GetTileArrayIndex(selectedTile1);
                 index2 = GetTileArrayIndex(selectedTile2);
@@ -245,8 +268,10 @@ namespace ShisenSho
             return result;
         }
 
-        private Vector2Int GetTileArrayIndex(GameObject tile)
+        
+        private Vector2Int GetTileArrayIndex(GameObject tileObj)
         {
+            var tile = tileObj.GetComponent<Tile>();
             for(int y =0; y <Board.TileArray.GetLength(0); y++) 
             {
                 for( int x=0; x<Board.TileArray.GetLength(1); x++) 

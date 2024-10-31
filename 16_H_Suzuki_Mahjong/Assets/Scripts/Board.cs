@@ -10,12 +10,16 @@ namespace ShisenSho
         public GameObject tilePrefab;
         public Transform board;
         public RectTransform TileHolder;
+        public RectTransform EmptyTileHolder;
 
         private List<ShisenSho.Tile> tiles = new List<Tile>();
         private List<GameObject> tileObjList = new List<GameObject>();
 
         private Tile[,] tileArray;
         public  Tile[,] TileArray => tileArray;
+
+        [SerializeField]
+        private Player Player;
 
         readonly int Rows = 10;
         readonly int Cols = 19;
@@ -43,16 +47,32 @@ namespace ShisenSho
 
             for (int i = 0; i < Cols - 1; i++)
             {
-                var tile = new Tile(Suit.Manzu, Rank.One);
+                var tileObj = GenerateEmptyTile(Suit.Manzu, Rank.East);
+                var tile = tileObj.GetComponent<ShisenSho.Tile>();
                 tileArray[i, 0] = tile;
                 tileArray[i, Rows - 1] = tile;
+                tileObj.transform.SetParent(EmptyTileHolder,false);
+                tileObj.SetActive(false);
             }
 
             for (int i = 1; i < Rows - 1; i++)
             {
-                var tile = new Tile(Suit.Manzu, Rank.One);
+                var tileObj = GenerateEmptyTile(Suit.Manzu, Rank.East);
+                var tile = tileObj.GetComponent<ShisenSho.Tile>();
                 tileArray[0, i] = tile;
                 tileArray[Cols - 1, i] = tile;
+                tileObj.transform.SetParent(EmptyTileHolder, false);
+                tileObj.SetActive(false);
+            }
+
+            Player.IsStuckCheck();
+            if(Player.isStucked) 
+            {
+                Debug.LogAssertion("Shuffle Again");
+                ShuffleTile();
+                SetBoard();
+
+
             }
 
         }
@@ -114,6 +134,15 @@ namespace ShisenSho
                     RegistTile(tileObject);
                 }                
             }
+        }
+
+        GameObject GenerateEmptyTile(Suit suit , Rank rank) 
+        {
+            var tileObj = Instantiate(tilePrefab,board.position, Quaternion.identity);
+            var tile = tileObj.GetComponent<Tile>();
+            tile.Init(suit, rank);
+
+            return tileObj;
         }
     }
 }
