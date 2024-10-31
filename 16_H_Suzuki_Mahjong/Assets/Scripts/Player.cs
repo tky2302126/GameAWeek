@@ -1,9 +1,10 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using Cysharp.Threading.Tasks;
+
+
 
 namespace ShisenSho 
 {
@@ -403,8 +404,6 @@ namespace ShisenSho
             }
         }
 
-        
-
         private int GetEmptyPositionToLeft(Vector2Int tileIndex)
         {
             for (int x = tileIndex[1] - 1; x >= 0; x--)
@@ -475,6 +474,92 @@ namespace ShisenSho
             image.color = tileColor;
         }
 
+        public void OnClickButton() 
+        {
+            OnClickHint().Forget();
+        }
+        private async UniTaskVoid OnClickHint() 
+        {
+            List<GameObject> matchingList = new List<GameObject>();
+            HashSet<GameObject> processedTiles = new HashSet<GameObject>();
+
+            for (int y = 0; y < Board.TileArray.GetLength(1) - 1; y++)
+            {
+                for (int x = 0; x < Board.TileArray.GetLength(0) - 1; x++)
+                {
+                    //Vector2Int buff = new(Board.TileArray.GetLength(0), Board.TileArray.GetLength(1));
+                    try { if (Board.TileArray[x, y] == null) { continue; } }
+
+                    catch
+                    {
+                        Vector2Int buff = new(x, y);
+                        Debug.Log(buff);
+                    }
+
+                    if (Board.TileArray[x, y].gameObject == null) { continue; }
+                    var crrTileObj = Board.TileArray[x, y].gameObject;
+                    var crrTile = crrTileObj.GetComponent<Tile>();
+                    if (crrTile.State == State.None)
+                    {
+                        continue;
+                    }
+                    if (processedTiles.Contains(crrTileObj)) { continue; }
+                    if (crrTileObj.gameObject == null) { continue; }
+
+                    foreach (var other in Board.TileArray)
+                    {
+                        if (other == crrTileObj) { continue; }
+                        if (other == null) { continue; }
+                        if (other.gameObject == null) { continue; }
+                        if (other.State == State.None) { continue; }
+                        if (IsMatchingPair(crrTileObj.gameObject, other.gameObject))
+                        {
+                            matchingList.Add(crrTileObj);
+                            matchingList.Add(other.gameObject);
+
+                            processedTiles.Add(crrTileObj);
+                            processedTiles.Add(other.gameObject);
+
+                            //? State変更処理 いるか確認
+                        }
+                        else
+                        {
+                            //? State変更処理 いるか確認
+                        }
+                    }
+
+                }
+            }
+
+            // ! fixme 色変更メソッドの再構築
+            if (matchingList.Count > 0) 
+            {
+                foreach (var item in matchingList)
+                {
+                    if(item != null) 
+                    {
+                        var tileColor = item.GetComponent<Image>().color;
+                        tileColor.r = 0.5f;
+                        item.GetComponent<Image>().color = tileColor;
+                        await ResetColor(item.gameObject);
+                    }
+
+                }
+
+                
+            }
+
+            
+
+        }
+
+        private async UniTask ResetColor(GameObject tile)
+        {
+            var tileColor = tile.GetComponent<Image>().color;
+            await UniTask.Delay(2000);
+            tileColor.r = 1.0f;
+            
+        }
 
     }
 
