@@ -24,6 +24,9 @@ namespace ShisenSho
         [SerializeField]
         private InputActionAsset input;
 
+        [SerializeField]
+        private GameObject retryButton;
+
         public int remainArrayCount;
         public bool isStucked;
 
@@ -123,19 +126,24 @@ namespace ShisenSho
                         if(isStucked && remainArrayCount == 0) 
                         {
                             Debug.Log("Game Clear!");
+                            SoundManager.Instance.PlaySE(SE.over);
+                            input.Disable();
+                            retryButton.SetActive(true);
                         }
                         else if (isStucked) 
                         {
                             Debug.LogWarning("It's Stacked");
+                            SoundManager.Instance.PlaySE(SE.over);
+                            input.Disable();
+                            retryButton.SetActive(true);
                         }
+                        SoundManager.Instance.PlaySE(SE.succeed);
                     }
                     else 
                     {
                         // ペアのマッチングが成立しなかった場合の処理をここに記述
 
                         Debug.Log("Not a Matching Pair");
-
-
 
                         // 選択した2つの麻雀牌を再び非選択状態に戻す。
                         var tile1 = selectedTile1.GetComponent<Tile>();
@@ -150,15 +158,19 @@ namespace ShisenSho
                             SetTileTransparency(item, 1.0f);
 
                         }
-
+                        SoundManager.Instance.PlaySE(SE.failed);
                     }
 
                     // 選択した麻雀牌をリストから削除
 
                     selectedTiles.Clear();
                 }
+                else 
+                {
+                    SoundManager.Instance.PlaySE(SE.select);
                 }
             }
+        }
         
         private void SetTileTransparency(GameObject clickedTile, float alpha)
         {
@@ -209,12 +221,6 @@ namespace ShisenSho
 
                             processedTiles.Add(crrTileObj);
                             processedTiles.Add(other.gameObject);
-
-                            //? State変更処理 いるか確認
-                        }
-                        else 
-                        {
-                            //? State変更処理 いるか確認
                         }
                     }
 
@@ -624,6 +630,15 @@ namespace ShisenSho
             await UniTask.Delay(2000);
             tileColor.r = 1.0f;
             tile.GetComponent<Image>().color = tileColor;
+        }
+        #endregion
+
+        #region リトライボタン
+        public void OnClickRetryButton() 
+        {
+            if(input.enabled == false) input.Enable();
+            retryButton.SetActive(false);
+            Board.ResetGame();
         }
         #endregion
     }

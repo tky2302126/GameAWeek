@@ -152,6 +152,12 @@ namespace ShisenSho
 
             return tileObj;
         }
+
+        public void ResetGame()
+        {
+            tileObjList.Clear();
+            Init();
+        }
     }
 }
 
