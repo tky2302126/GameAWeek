@@ -27,6 +27,11 @@ namespace ShisenSho
 
         private void Start()
         {
+            Init();
+        }
+
+        private void Init() 
+        {
             tileArray = new Tile[Cols, Rows];
             GenerateTiles();
             ShuffleTile();
@@ -40,6 +45,9 @@ namespace ShisenSho
                 tileObjList[i].transform.SetParent(TileHolder,false);
                 int x = i % 17+1;
                 int y = i / 17+1;
+                {
+                    tileObjList[i].transform.localPosition = new Vector3(x*60, y*80, 0);
+                }
                 var tile = tileObjList[i].GetComponent<ShisenSho.Tile>();
                 tile.SetState(State.IsAlive);
                 tileArray[x, y] = tile;

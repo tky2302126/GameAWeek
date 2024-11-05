@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -17,15 +17,9 @@ namespace ShisenSho
         private Vector2Int index1;
         private Vector2Int index2;
 
-        // ‚¢‚ç‚È‚»‚¤
+        // ã„ã‚‰ãªãã†
         [SerializeField]
         private Board Board;
-
-        //[SerializeField]
-        //float distance = 10.0f;
-
-        //[SerializeField]
-        //bool drawRayDump = false;
 
         [SerializeField]
         private InputActionAsset input;
@@ -45,25 +39,7 @@ namespace ShisenSho
             input.Disable();
         }
 
-        private void Update()
-        {
-            //if (drawRayDump) 
-            //{
-            //    if(selectedTiles.Count > 0) 
-            //    {
-            //        foreach(var tile in selectedTiles) 
-            //        {
-            //            Vector2 pos = tile.transform.position;
-
-            //            Debug.DrawRay(pos,Vector2.up * distance,Color.red);
-            //            Debug.DrawRay(pos,Vector2.down * distance,Color.green);
-            //            Debug.DrawRay(pos,Vector2.left * distance,Color.yellow);
-            //            Debug.DrawRay(pos,Vector2.right * distance,Color.blue);
-            //        }
-            //    }
-            //}
-        }
-
+        #region æ“ä½œé–¢ä¿‚
         public void OnClick(InputAction.CallbackContext context) 
         {
             Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -107,13 +83,13 @@ namespace ShisenSho
 
                     if (IsMatchingPair(selectedTile1, selectedTile2)) 
                     {
-                        // ƒyƒA‚Ìƒ}ƒbƒ`ƒ“ƒO‚ª¬—§‚µ‚½ê‡‚Ìˆ—‚ğ‚±‚±‚É‹Lq
+                        // ãƒšã‚¢ã®ãƒãƒƒãƒãƒ³ã‚°ãŒæˆç«‹ã—ãŸå ´åˆã®å‡¦ç†ã‚’ã“ã“ã«è¨˜è¿°
 
                         Debug.Log("Matching Pair!");
 
 
 
-                        // ¬—§‚µ‚½ƒyƒA‚ğ”ñ•\¦‚É‚·‚é‚È‚Ç‚ÌƒAƒNƒVƒ‡ƒ“‚ğÀs
+                        // æˆç«‹ã—ãŸãƒšã‚¢ã‚’éè¡¨ç¤ºã«ã™ã‚‹ãªã©ã®ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã‚’å®Ÿè¡Œ
                         var tile1 = selectedTile1.GetComponent<Tile>();
                         tile1.SetState(State.None);
                         var tile2 = selectedTile2.GetComponent<Tile>();
@@ -129,11 +105,11 @@ namespace ShisenSho
                         //selectedTile1.SetActive(false);
                         //selectedTile2.SetActive(false);
 
-                        //@è‹l‚Ü‚è‚©‚Ç‚¤‚©ƒ`ƒFƒbƒN‚µ‚ÄB
+                        //ã€€æ‰‹è©°ã¾ã‚Šã‹ã©ã†ã‹ãƒã‚§ãƒƒã‚¯ã—ã¦ã€‚
 
                         IsStuckCheck();
 
-                        //  c‚è‚Ì”v‚ğ”‚¦‚ÄB
+                        //  æ®‹ã‚Šã®ç‰Œã‚’æ•°ãˆã¦ã€‚
                         remainArrayCount = 0;
                         foreach(var item in Board.TileArray) 
                         {
@@ -143,7 +119,7 @@ namespace ShisenSho
                             }
                         }
 
-                        //  ƒNƒŠƒA‚µ‚½‚Ì‚©Aè‹l‚Ü‚è‚È‚Ì‚©•\¦‚·‚éˆ—
+                        //  ã‚¯ãƒªã‚¢ã—ãŸã®ã‹ã€æ‰‹è©°ã¾ã‚Šãªã®ã‹è¡¨ç¤ºã™ã‚‹å‡¦ç†
                         if(isStucked && remainArrayCount == 0) 
                         {
                             Debug.Log("Game Clear!");
@@ -155,18 +131,18 @@ namespace ShisenSho
                     }
                     else 
                     {
-                        // ƒyƒA‚Ìƒ}ƒbƒ`ƒ“ƒO‚ª¬—§‚µ‚È‚©‚Á‚½ê‡‚Ìˆ—‚ğ‚±‚±‚É‹Lq
+                        // ãƒšã‚¢ã®ãƒãƒƒãƒãƒ³ã‚°ãŒæˆç«‹ã—ãªã‹ã£ãŸå ´åˆã®å‡¦ç†ã‚’ã“ã“ã«è¨˜è¿°
 
                         Debug.Log("Not a Matching Pair");
 
 
 
-                        // ‘I‘ğ‚µ‚½2‚Â‚Ì–ƒ”v‚ğÄ‚Ñ”ñ‘I‘ğó‘Ô‚É–ß‚·B
+                        // é¸æŠã—ãŸ2ã¤ã®éº»é›€ç‰Œã‚’å†ã³éé¸æŠçŠ¶æ…‹ã«æˆ»ã™ã€‚
                         var tile1 = selectedTile1.GetComponent<Tile>();
                         tile1.SetState(State.IsAlive);
                         var tile2 = selectedTile2.GetComponent<Tile>();
                         tile2.SetState(State.IsAlive);
-                        //  Œ³‚ÌF‚É–ß‚·ˆ—
+                        //  å…ƒã®è‰²ã«æˆ»ã™å‡¦ç†
 
                         foreach (var item in selectedTiles)
                         {
@@ -177,13 +153,21 @@ namespace ShisenSho
 
                     }
 
-                    // ‘I‘ğ‚µ‚½–ƒ”v‚ğƒŠƒXƒg‚©‚çíœ
+                    // é¸æŠã—ãŸéº»é›€ç‰Œã‚’ãƒªã‚¹ãƒˆã‹ã‚‰å‰Šé™¤
 
                     selectedTiles.Clear();
                 }
                 }
             }
-
+        
+        private void SetTileTransparency(GameObject clickedTile, float alpha)
+        {
+            var image = clickedTile.GetComponent<Image>();
+            var tileColor = image.color;
+            tileColor.a = alpha;
+            image.color = tileColor;
+        }
+        #endregion
         public void IsStuckCheck()
         {
             List<GameObject> matchingList  = new List<GameObject>();
@@ -214,7 +198,7 @@ namespace ShisenSho
 
                     foreach (var other in Board.TileArray ) 
                     {
-                        if( other == crrTileObj ) { continue; }
+                        if( other == crrTile ) { continue; }
                         if(other == null) { continue; }
                         if(other.gameObject == null) { continue; }
                         if(other.State == State.None ) { continue; }
@@ -226,11 +210,11 @@ namespace ShisenSho
                             processedTiles.Add(crrTileObj);
                             processedTiles.Add(other.gameObject);
 
-                            //? State•ÏXˆ— ‚¢‚é‚©Šm”F
+                            //? Stateå¤‰æ›´å‡¦ç† ã„ã‚‹ã‹ç¢ºèª
                         }
                         else 
                         {
-                            //? State•ÏXˆ— ‚¢‚é‚©Šm”F
+                            //? Stateå¤‰æ›´å‡¦ç† ã„ã‚‹ã‹ç¢ºèª
                         }
                     }
 
@@ -248,12 +232,12 @@ namespace ShisenSho
             var result = false;
             var tile1 = selectedTile1.GetComponent<Tile>();
             var tile2 = selectedTile2.GetComponent<Tile>();
-            // Œo˜H’Tõ
+            // çµŒè·¯æ¢ç´¢
             if (IsMatchingPaiInfo(tile1,tile2)) 
             {
                 index1 = GetTileArrayIndex(selectedTile1);
                 index2 = GetTileArrayIndex(selectedTile2);
-
+#if true
                 if (HasValidPathBetweenTilesXYX(index1, index2)) 
                 {
                     result = true;
@@ -263,23 +247,33 @@ namespace ShisenSho
                 {
                     result = true;
                 }
+#else
+                if (HasValidPathBetweenTiles(index1, index2,"XYX"))
+                {
+                    result = true;
+                }
+
+                else if (HasValidPathBetweenTiles(index1, index2,"YXY"))
+                {
+                    result = true;
+                }
+#endif
             }
 
 
             return result;
         }
 
-        
         private Vector2Int GetTileArrayIndex(GameObject tileObj)
         {
             var tile = tileObj.GetComponent<Tile>();
-            for(int y =0; y <Board.TileArray.GetLength(0); y++) 
+            for(int x =0; x <Board.TileArray.GetLength(0); x++) 
             {
-                for( int x=0; x<Board.TileArray.GetLength(1); x++) 
+                for( int y=0; y<Board.TileArray.GetLength(1); y++) 
                 {
-                    if (Board.TileArray[y,x] == tile) 
+                    if (Board.TileArray[x,y] == tile) 
                     {
-                        return new Vector2Int(y, x);
+                        return new Vector2Int(x, y);
                     }
                 }
             }
@@ -289,7 +283,7 @@ namespace ShisenSho
 
         private bool HasValidPathBetweenTilesYXY(Vector2Int index1, Vector2Int index2)
         {
-            //“ñ‚Â‚Ì–ƒ”v‚Ì‚à‚Á‚Æ‚à‰“‚¢¶‰E‚Ì‹ó”’ƒZƒ‹‚ÌXÀ•Wi‰¡²j‚ğ’²‚×‚éB
+            //äºŒã¤ã®éº»é›€ç‰Œã®ã‚‚ã£ã¨ã‚‚é ã„å·¦å³ã®ç©ºç™½ã‚»ãƒ«ã®Xåº§æ¨™ï¼ˆæ¨ªè»¸ï¼‰ã‚’èª¿ã¹ã‚‹ã€‚
             int downA = GetEmptyPositionToDown(index1);
             int upA = GetEmptyPositionToUp(index1);
             int downB = GetEmptyPositionToDown(index2);
@@ -299,21 +293,21 @@ namespace ShisenSho
             int upY = Mathf.Min(upA, upB);
 
 
-            //d•¡•”•ª‚ª‚ ‚é‚©’²‚×‚é€”õ
-            //1‚Â‚ß‚Ìƒ^ƒCƒ‹‚ªã‚É‚ ‚éê‡
+            //é‡è¤‡éƒ¨åˆ†ãŒã‚ã‚‹ã‹èª¿ã¹ã‚‹æº–å‚™
+            //1ã¤ã‚ã®ã‚¿ã‚¤ãƒ«ãŒä¸Šã«ã‚ã‚‹å ´åˆ
             if (index1[0] <= index2[0] && upB>= downA) 
             {
-                // Œo˜H‚ªŒ©‚Â‚©‚Á‚½‚çtrue
+                // çµŒè·¯ãŒè¦‹ã¤ã‹ã£ãŸã‚‰true
                 return HasHorizontalBlanksInRectAngle(downY, upY);
             }
-            //1‚Â‚ß‚Ìƒ^ƒCƒ‹‚ª‰º‚É‚ ‚éê‡
+            //1ã¤ã‚ã®ã‚¿ã‚¤ãƒ«ãŒä¸‹ã«ã‚ã‚‹å ´åˆ
             else if (index1[0] > index2[0] && upB>= upA) 
             {
                 return HasHorizontalBlanksInRectAngle(downY, upY);
             }
             else 
             {
-                //Œ©‚Â‚©‚ç‚È‚¯‚ê‚Îfalse
+                //è¦‹ã¤ã‹ã‚‰ãªã‘ã‚Œã°false
                 return false;
             }
             
@@ -331,7 +325,7 @@ namespace ShisenSho
                         if (Board.TileArray[y,x].State == State.None) 
                         {
                             emptyCellCount++;
-                            if(emptyCellCount == absValue + 1) 
+                            if(emptyCellCount == absValue /*+ 1*/) 
                             {
                                 return true;
                             }
@@ -345,7 +339,7 @@ namespace ShisenSho
 
         private bool HasValidPathBetweenTilesXYX(Vector2Int index1, Vector2Int index2)
         {
-            //“ñ‚Â‚Ì–ƒ”v‚Ì‚à‚Á‚Æ‚à‰“‚¢ã‰º‚Ì‹ó”’ƒZƒ‹‚ÌYÀ•Wic²j‚ğ’²‚×‚éB
+            //äºŒã¤ã®éº»é›€ç‰Œã®ã‚‚ã£ã¨ã‚‚é ã„ä¸Šä¸‹ã®ç©ºç™½ã‚»ãƒ«ã®Yåº§æ¨™ï¼ˆç¸¦è»¸ï¼‰ã‚’èª¿ã¹ã‚‹ã€‚
             int leftA = GetEmptyPositionToLeft(index1);
             int rightA = GetEmptyPositionToRight(index1);
             int leftB = GetEmptyPositionToLeft(index2);
@@ -356,13 +350,13 @@ namespace ShisenSho
             int leftX = Mathf.Max(leftA, leftB);
             int rightX = Mathf.Min(rightA, rightB);
 
-            // 1‚Â‚ß‚Ìƒ^ƒCƒ‹‚ª¶‚É‚ ‚é
+            // 1ã¤ã‚ã®ã‚¿ã‚¤ãƒ«ãŒå·¦ã«ã‚ã‚‹æ™‚
             if (index1[1] <= index2[1] && rightA >= leftB) 
             {
-                // Œo˜H‚ªŒ©‚Â‚©‚Á‚½‚çtrue
+                // çµŒè·¯ãŒè¦‹ã¤ã‹ã£ãŸã‚‰true
                 return HasVerticalBlanksRectAngle(leftX, rightX);
             }
-            // 1‚Â‚ß‚Ìƒ^ƒCƒ‹‚ª‰E‚É‚ ‚é
+            // 1ã¤ã‚ã®ã‚¿ã‚¤ãƒ«ãŒå³ã«ã‚ã‚‹æ™‚
             else if (index1[1] > index2[1] && rightB >= leftA) 
             {
                 return HasVerticalBlanksRectAngle(leftX, rightX);
@@ -370,7 +364,7 @@ namespace ShisenSho
             
             else 
             {
-                //Œ©‚Â‚©‚ç‚È‚¯‚ê‚Îfalse
+                //è¦‹ã¤ã‹ã‚‰ãªã‘ã‚Œã°false
                 return false;
             }
 
@@ -388,6 +382,7 @@ namespace ShisenSho
                     emptycellCount = 0;
                     for(int y = minY; y <= maxY; y++) 
                     {
+                        // !
                         if (Board.TileArray[y,x].State == State.None) 
                         {
                             emptycellCount++;
@@ -404,6 +399,81 @@ namespace ShisenSho
             }
         }
 
+        private bool HasValidPathBetweenTiles(Vector2Int index1, Vector2Int index2,string pattern) 
+        {
+            int primaryA ,secondaryA,primaryB,secondaryB;
+            int primaryMin,primaryMax;
+
+            if(pattern == "XYX") 
+            {
+                primaryA = GetEmptyPositionToLeft(index1);
+                secondaryA = GetEmptyPositionToRight(index1);
+                primaryB = GetEmptyPositionToLeft(index2);
+                secondaryB = GetEmptyPositionToRight(index2);
+                primaryMin = Mathf.Min(primaryA, primaryB);
+                primaryMax = Mathf.Max(secondaryA, secondaryB);
+
+                if (index1[1]<= index2[1] && secondaryA >= primaryB) 
+                {
+                    return HasBlanksInRectAngle(primaryMin, primaryMax,index1,index2,"vertical");
+                }
+                else if (index1[1]> index2[1] &&secondaryB >= primaryA) 
+                {
+                    return HasBlanksInRectAngle(primaryMin, primaryMax, index1, index2, "vertical");
+                }
+            }
+            else if(pattern == "YXY") 
+            {
+                primaryA = GetEmptyPositionToDown(index1);
+                secondaryA = GetEmptyPositionToUp(index1);
+                primaryB = GetEmptyPositionToDown(index2);
+                secondaryB = GetEmptyPositionToUp(index2);
+                primaryMin = Mathf.Min(primaryA, primaryB);
+                primaryMax = Mathf.Max(secondaryA, secondaryB);
+
+                if (index1[0] <= index2[0] && secondaryB >= primaryA)
+                {
+                    return HasBlanksInRectAngle(primaryMin, primaryMax, index1, index2, "horizontal");
+                }
+                else if (index1[0] > index2[0] && secondaryB >= primaryA)
+                {
+                    return HasBlanksInRectAngle(primaryMin, primaryMax, index1, index2, "horizontal");
+                }
+
+            }
+
+            return false;
+        }
+
+        private bool HasBlanksInRectAngle(int primaryMin,int primaryMax,Vector2Int index1,Vector2Int index2,string direction) 
+        {
+            int min = (direction == "vertical") ? Mathf.Min(index1[0], index2[0]) : Mathf.Min(index1[1], index2[1]);
+            int max = (direction == "vertical") ? Mathf.Max(index1[0], index2[0]) : Mathf.Max(index1[1], index2[1]);
+            int requiredEmptyCount = max - min+1;
+
+            for(int i = primaryMin;i <= primaryMax; i++) 
+            {
+                int emptyCellCount = 0;
+                for(int j = min; j <= max; j++) 
+                {
+                    int x = (direction == "vertical")? i: j;
+                    int y = (direction == "vertical")? j: i;
+
+                    if (Board.TileArray[y,x].State == State.None) 
+                    {
+                        emptyCellCount++;
+                        if(emptyCellCount == requiredEmptyCount) 
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        #region ãƒ˜ãƒ«ãƒ‘ãƒ¼é–¢æ•°
         private int GetEmptyPositionToLeft(Vector2Int tileIndex)
         {
             for (int x = tileIndex[1] - 1; x >= 0; x--)
@@ -461,19 +531,13 @@ namespace ShisenSho
             return tile1.Suit == tile2.Suit && tile1.Rank == tile2.Rank;
         }
 
-        private bool IsMatchingPaiInfo(Tile tile1,Tile tile2) 
+        private bool IsMatchingPaiInfo(Tile tile1, Tile tile2)
         {
             return tile1.Suit == tile2.Suit && tile1.Rank == tile2.Rank;
         }
+        #endregion
 
-        private void SetTileTransparency(GameObject clickedTile, float alpha)
-        {
-            var image = clickedTile.GetComponent<Image>();
-            var tileColor = image.color;
-            tileColor.a = alpha;
-            image.color = tileColor;
-        }
-
+        #region ãƒ’ãƒ³ãƒˆãƒœã‚¿ãƒ³
         public void OnClickButton() 
         {
             OnClickHint().Forget();
@@ -508,10 +572,11 @@ namespace ShisenSho
 
                     foreach (var other in Board.TileArray)
                     {
-                        if (other == crrTileObj) { continue; }
+                        if (other == crrTile) { continue; }
                         if (other == null) { continue; }
                         if (other.gameObject == null) { continue; }
                         if (other.State == State.None) { continue; }
+                        if(!IsMatchingPaiInfo(crrTile, other)) { continue; }
                         if (IsMatchingPair(crrTileObj.gameObject, other.gameObject))
                         {
                             matchingList.Add(crrTileObj);
@@ -520,37 +585,37 @@ namespace ShisenSho
                             processedTiles.Add(crrTileObj);
                             processedTiles.Add(other.gameObject);
 
-                            //? State•ÏXˆ— ‚¢‚é‚©Šm”F
-                        }
-                        else
-                        {
-                            //? State•ÏXˆ— ‚¢‚é‚©Šm”F
+                            
                         }
                     }
 
                 }
             }
 
-            // ! fixme F•ÏXƒƒ\ƒbƒh‚ÌÄ\’z
-            if (matchingList.Count > 0) 
+#if UNITY_EDITOR
+            DumpMatchingList(matchingList);
+#endif
+
+            // ! fixme è‰²å¤‰æ›´ãƒ¡ã‚½ãƒƒãƒ‰ã®å†æ§‹ç¯‰
+
+            var randomIndex = Random.Range(0, matchingList.Count);
+            var tileColor = matchingList[randomIndex].GetComponent<Image>().color;
+            tileColor.r = 0.5f;
+            matchingList[randomIndex].GetComponent<Image>().color = tileColor;
+            await ResetColor(matchingList[randomIndex]);    
+            matchingList.Clear();
+        }
+
+        private void DumpMatchingList(List<GameObject> matchingList)
+        {
+            foreach (var item in matchingList)
             {
-                foreach (var item in matchingList)
-                {
-                    if(item != null) 
-                    {
-                        var tileColor = item.GetComponent<Image>().color;
-                        tileColor.r = 0.5f;
-                        item.GetComponent<Image>().color = tileColor;
-                        await ResetColor(item.gameObject);
-                    }
-
-                }
-
-                
+                Vector2Int pos = GetTileArrayIndex(item);
+                var tile = item.GetComponent<Tile>();
+                Debug.Log($"Pos : {pos.x} , {pos.y}\n" +
+                    $"TileInfo : {tile.Suit} , {tile.Rank}\n");
+               // Debug.Log($"TileInfo : {tile.Suit} , {tile.Rank}\n");
             }
-
-            
-
         }
 
         private async UniTask ResetColor(GameObject tile)
@@ -558,12 +623,12 @@ namespace ShisenSho
             var tileColor = tile.GetComponent<Image>().color;
             await UniTask.Delay(2000);
             tileColor.r = 1.0f;
-            
+            tile.GetComponent<Image>().color = tileColor;
         }
-
+        #endregion
     }
 
-        
+
 }
 
 
