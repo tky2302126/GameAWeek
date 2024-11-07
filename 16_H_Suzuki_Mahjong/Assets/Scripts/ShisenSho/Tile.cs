@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -22,7 +22,7 @@ namespace ShisenSho
 
     public enum Rank
     {
-        // ””v
+        // æ•°ç‰Œ
         One = 1,
         Two,
         Three,
@@ -33,7 +33,7 @@ namespace ShisenSho
         Eight,
         Nine,
 
-        // š”v
+        // å­—ç‰Œ
         East = 11,
         South,
         West,
