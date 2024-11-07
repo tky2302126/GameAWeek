@@ -2,10 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoardView : MonoBehaviour
+namespace CheckAgari 
 {
-    [SerializeField]
-    private RectTransform tilesHolder;
+    public class BoardView : MonoBehaviour
+    {
+        [SerializeField]
+        private RectTransform tilesHolder;
 
-    public  RectTransform TilesHolder => tilesHolder;
+        public RectTransform TilesHolder => tilesHolder;
+    }
 }
+

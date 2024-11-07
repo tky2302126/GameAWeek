@@ -21,6 +21,7 @@ public class TilePresenter : MonoBehaviour
 
     public void Init(Suit _suit, Rank _rank) 
     {
+        if(model == null) { model = new TileModel(); }
         model.SetModel(_suit, _rank);
 
         int index =-1;

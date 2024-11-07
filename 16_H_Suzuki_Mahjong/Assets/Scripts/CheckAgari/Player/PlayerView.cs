@@ -7,4 +7,19 @@ public class PlayerView : MonoBehaviour
     [SerializeField]
     private RectTransform hand;
     public  RectTransform Hand => hand;
+
+    public void Draw() 
+    {
+        
+    }
+
+    public void Remove() 
+    {
+        
+    }
+
+    public void Add() 
+    {
+        
+    }
 }
