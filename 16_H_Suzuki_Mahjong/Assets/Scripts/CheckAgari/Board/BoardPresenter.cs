@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class BoardPresenter : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private BoardModel model;
+    public BoardModel Model => model;
+
+    [SerializeField]
+    private BoardView view;
+
+    private void Start()
     {
-        
+        model = new BoardModel();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
+
 }

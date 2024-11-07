@@ -4,15 +4,8 @@ using UnityEngine;
 
 public class BoardView : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField]
+    private RectTransform tilesHolder;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public  RectTransform TilesHolder => tilesHolder;
 }
