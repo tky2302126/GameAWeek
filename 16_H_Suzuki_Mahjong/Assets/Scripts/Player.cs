@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using TMPro;
 
 
 
@@ -26,6 +28,9 @@ namespace ShisenSho
 
         [SerializeField]
         private GameObject retryButton;
+
+        [SerializeField]
+        private GameObject over;
 
         public int remainArrayCount;
         public bool isStucked;
@@ -90,8 +95,6 @@ namespace ShisenSho
 
                         Debug.Log("Matching Pair!");
 
-
-
                         // 成立したペアを非表示にするなどのアクションを実行
                         var tile1 = selectedTile1.GetComponent<Tile>();
                         tile1.SetState(State.None);
@@ -129,6 +132,9 @@ namespace ShisenSho
                             SoundManager.Instance.PlaySE(SE.over);
                             input.Disable();
                             retryButton.SetActive(true);
+                            over.transform.DOLocalMove(new Vector3(0,0,0),1f).SetEase(Ease.OutBounce);
+                            var text = over.GetComponent<TextMeshProUGUI>();
+                            text.SetText("Game Clear!");
                         }
                         else if (isStucked) 
                         {
@@ -136,6 +142,9 @@ namespace ShisenSho
                             SoundManager.Instance.PlaySE(SE.over);
                             input.Disable();
                             retryButton.SetActive(true);
+                            over.transform.DOLocalMove(new Vector3(0, 0, 0), 1f).SetEase(Ease.OutBounce);
+                            var text = over.GetComponent<TextMeshProUGUI>();
+                            text.SetText("Game Over");
                         }
                         SoundManager.Instance.PlaySE(SE.succeed);
                     }
@@ -265,8 +274,6 @@ namespace ShisenSho
                 }
 #endif
             }
-
-
             return result;
         }
 
@@ -557,7 +564,6 @@ namespace ShisenSho
             {
                 for (int x = 0; x < Board.TileArray.GetLength(0) - 1; x++)
                 {
-                    //Vector2Int buff = new(Board.TileArray.GetLength(0), Board.TileArray.GetLength(1));
                     try { if (Board.TileArray[x, y] == null) { continue; } }
 
                     catch
@@ -590,11 +596,8 @@ namespace ShisenSho
 
                             processedTiles.Add(crrTileObj);
                             processedTiles.Add(other.gameObject);
-
-                            
                         }
                     }
-
                 }
             }
 
@@ -624,12 +627,17 @@ namespace ShisenSho
             }
         }
 
-        private async UniTask ResetColor(GameObject tile)
+        private async UniTask ResetColor(GameObject _tile)
         {
-            var tileColor = tile.GetComponent<Image>().color;
+            var tileColor = _tile.GetComponent<Image>().color;
             await UniTask.Delay(2000);
             tileColor.r = 1.0f;
-            tile.GetComponent<Image>().color = tileColor;
+            _tile.GetComponent<Image>().color = tileColor;
+            var tile = _tile.GetComponent<Tile>();
+            if(tile.State == State.Selected) 
+            {
+                SetTileTransparency(_tile, 0.5f);
+            }
         }
         #endregion
 
@@ -638,6 +646,7 @@ namespace ShisenSho
         {
             if(input.enabled == false) input.Enable();
             retryButton.SetActive(false);
+            over.transform.DOLocalMove(new Vector3(0, 920, 0), 0.1f);
             Board.ResetGame();
         }
         #endregion

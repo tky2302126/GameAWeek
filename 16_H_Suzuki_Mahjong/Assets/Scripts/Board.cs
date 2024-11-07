@@ -156,7 +156,23 @@ namespace ShisenSho
         public void ResetGame()
         {
             tileObjList.Clear();
+            DeleteAllChildren(TileHolder);
+            DeleteAllChildren(EmptyTileHolder);
             Init();
+        }
+
+        private void DeleteAllChildren(Transform parent) 
+        {
+            if(parent == null) 
+            {
+                Debug.Log("parent is null !");
+                return;
+            }
+
+            foreach( Transform child in parent) 
+            {
+                Destroy(child.gameObject);
+            }
         }
     }
 }
