@@ -4,25 +4,25 @@ using System.Collections.Generic;
 using ShisenSho;
 using UnityEngine;
 
+
+/// <summary>
+/// modelクラスは不要(sbyte idのみ)になった
+/// </summary>
 public class TilePresenter : MonoBehaviour
 {
     // you may write here methods
 
-    private TileModel model;
+    private sbyte id;
+    public sbyte Id => id;
 
     [SerializeField]
     private TileView view;
     public  TileView View => view;
 
-    private void Start()
-    {
-        model = new TileModel();
-    }
 
-    public void Init(int _id) 
+    public void Init(sbyte _id) 
     {
-        if (model == null) { model = new TileModel(); }
-        model.SetModel(_id);
+        id = _id;
 
         view.SetImage(_id);
     }

@@ -44,7 +44,7 @@ namespace CheckAgari
             //    tileObj.transform.SetParent(view.TilesHolder.transform, false);
             //}
 
-            for(int _id = 0; _id <= 33; ++_id) 
+            for(sbyte _id = 0; _id <= 33; ++_id) 
             {
                 var tileObj = Instantiate(tilePrefab, new Vector3(0, 0, 0), Quaternion.identity);
                 var tile = tileObj.GetComponent<TilePresenter>();
