@@ -37,15 +37,11 @@ public class TileModel
 {
     // you may write here fields
 
-    private Suit suit;
-    public Suit Suit => suit;
+    private int id;
+    public int Id => id;
 
-    private Rank rank;
-    public Rank Rank => rank;
-
-    public void SetModel(Suit _suit, Rank _rank) 
+    public void SetModel(int _id) 
     {
-        suit = _suit;
-        rank = _rank;
+        id = _id;
     }
 }

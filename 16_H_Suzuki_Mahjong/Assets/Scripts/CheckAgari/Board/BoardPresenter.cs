@@ -24,23 +24,31 @@ namespace CheckAgari
         private void Init() 
         {
             
-            for (Suit suit = Suit.Manzu; suit <= Suit.Souzu; suit++) 
-            {
-                for(Rank rank = Rank.One; rank <= Rank.Nine; rank++) 
-                {
-                    var tileObj = Instantiate(tilePrefab, new Vector3(0,0,0), Quaternion.identity);
-                    var tile = tileObj.GetComponent<TilePresenter>();
-                    tile.Init(suit, rank);
-                    tileObj.transform.SetParent(view.TilesHolder.transform, false);
-                }
-            }
+            //for (Suit suit = Suit.Manzu; suit <= Suit.Souzu; suit++) 
+            //{
+            //    for(Rank rank = Rank.One; rank <= Rank.Nine; rank++) 
+            //    {
+            //        var tileObj = Instantiate(tilePrefab, new Vector3(0,0,0), Quaternion.identity);
+            //        var tile = tileObj.GetComponent<TilePresenter>();
+            //        tile.Init(suit, rank);
+            //        tileObj.transform.SetParent(view.TilesHolder.transform, false);
+            //    }
+            //}
 
-            for(Rank rank = Rank.East;  rank <= Rank.Red; rank++) 
+            //for(Rank rank = Rank.East;  rank <= Rank.Red; rank++) 
+            //{
+            //    Suit suit = Suit.Jihai;
+            //    var tileObj = Instantiate(tilePrefab, new Vector3(0, 0, 0), Quaternion.identity);
+            //    var tile = tileObj.GetComponent<TilePresenter>();
+            //    tile.Init(suit, rank);
+            //    tileObj.transform.SetParent(view.TilesHolder.transform, false);
+            //}
+
+            for(int _id = 0; _id <= 33; ++_id) 
             {
-                Suit suit = Suit.Jihai;
                 var tileObj = Instantiate(tilePrefab, new Vector3(0, 0, 0), Quaternion.identity);
                 var tile = tileObj.GetComponent<TilePresenter>();
-                tile.Init(suit, rank);
+                tile.Init(_id);
                 tileObj.transform.SetParent(view.TilesHolder.transform, false);
             }
         }

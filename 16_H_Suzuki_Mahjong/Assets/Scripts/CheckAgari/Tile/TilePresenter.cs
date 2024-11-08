@@ -19,21 +19,11 @@ public class TilePresenter : MonoBehaviour
         model = new TileModel();
     }
 
-    public void Init(Suit _suit, Rank _rank) 
+    public void Init(int _id) 
     {
-        if(model == null) { model = new TileModel(); }
-        model.SetModel(_suit, _rank);
+        if (model == null) { model = new TileModel(); }
+        model.SetModel(_id);
 
-        int index =-1;
-        if(_suit == Suit.Jihai)
-        {
-            index = ((int)_suit * 9) + ((int)_rank - 11); // Rank.East = 11
-        }
-        else
-        {
-            index = ((int)_suit * 9) + ((int)_rank - 1); // Rank.One = 1
-        }
-
-        view.SetImage(index);
+        view.SetImage(_id);
     }
 }
