@@ -12,7 +12,7 @@ public class TilePresenter : MonoBehaviour
 {
     // you may write here methods
 
-    private sbyte id;
+    private sbyte id; //0~33‚Å§Œä
     public sbyte Id => id;
 
     [SerializeField]

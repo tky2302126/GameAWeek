@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -15,7 +16,8 @@ using UnityEngine;
 /// 合計で14枚
 /// 
 /// すべてのあがり手牌パターンを保存する
-/// 
+/// int ビット演算で牌情報を記録できそう
+/// 河は17，18枚のため可能
 /// 
 /// </summary>
 public class CalculateTilePattern : MonoBehaviour
@@ -25,6 +27,15 @@ public class CalculateTilePattern : MonoBehaviour
     public string fileName_ALL;
 
     public string fileName_Agari;
+
+    public List<List<sbyte>> patternTest;
+
+    private List<byte[]> patternTestByte = new List< byte[]>();
+
+    private void Start()
+    {
+        if(patternTest == null) { patternTest = new List<List<sbyte>>(); }
+    }
     public void CalculateALLPatterns() 
     {
         
@@ -34,15 +45,110 @@ public class CalculateTilePattern : MonoBehaviour
     /// 手牌パターンをすべて書き出すスクリプト(清一色版)
     /// 
     /// 手牌パターン: 118800
+    ///               143975635
+    ///               多すぎる
+    ///               データ量が多すぎてメモリリークを起こしてそう
+    ///               405,350(普通の麻雀の場合)
     /// </summary>
     public void GenerateALLHandPatternsTEST() 
     {
         int MaxNum = 8;
         int Length = 14;
         int MaxCount = 4;
+        patternTest.Clear();
+
+        GeneratePattern(MaxNum, Length, MaxCount);
+
+        Debug.Log($"パターン数{patternTest.Count}");
 
 
     }
+    /// <summary>
+    /// 再帰関数ですべての手牌パターンを記録する
+    /// インスタンスが巨大になるため、メモ化再帰関数を使う
+    /// 
+    /// </summary>
+    /// <param name="maxNum"></param>
+    /// <param name="length"></param>
+    /// <param name="maxCount"></param>
+    /// <param name="currentHand"></param>
+    /// <param name="results"></param>
+    private List<List<sbyte>> GeneratePattern(int maxNum, int length, int maxCount, List<sbyte> currentHand = null, List<List<sbyte>> results = null , int startIndex =0) 
+    {
+        currentHand ??= new List<sbyte>();
+        results ??= new List<List<sbyte>>();
+
+        // lengthに達した時
+        if(currentHand.Count == length) 
+        {
+            results.Add(new List<sbyte>(currentHand));
+            return results;
+        }
+        //メモリ管理用に配列のサイズを制御
+        if(results.Count >= 1000) 
+        {
+            patternTest.AddRange(results);
+            results.Clear();
+        }
+
+        //再帰部分
+        // !前より小さい数を入れないようにする
+        for(int i =startIndex; i <= maxNum; i++) 
+        {
+            // 同じ牌が4枚以上入らないようにする
+            if (!CheckSameTileLimit(currentHand, i, maxCount)) { continue; }
+            currentHand.Add((sbyte)i);
+            GeneratePattern(maxNum,length,maxCount,currentHand,results,i);
+            currentHand.RemoveAt(currentHand.Count - 1); //バックトラック
+
+        }
+        if(results != null) 
+        {
+            patternTest.AddRange(results);
+        }
+
+        return results;
+    }
+
+    private List<byte[]> GeneratePatternByte(int maxNum, int length, int maxCount,
+                                         byte[] currentHand = null, List<byte[]> results = null,
+                                         int startIndex = 0) 
+    {
+        currentHand ??= new byte[5];
+        results ??= new List<byte[]>();
+
+
+
+        return results;
+    }
+
+
+
+    /// <summary>
+    /// 指定枚数以上同じ牌が入らないようにする
+    /// true : なし false : あり 
+    /// </summary>
+    /// <param name="currentHand"></param>
+    /// <param name="target"></param>
+    /// <param name="maxCount"></param>
+    /// <returns></returns>
+    private bool CheckSameTileLimit(List<sbyte> currentHand, int target, int maxCount)
+    {
+        bool result = true;
+        if(currentHand.Count <= 3 ) { return true; }
+
+        int count = 0; 
+
+        for(int i = 0; i< currentHand.Count; i++) 
+        {
+            if (currentHand[i] == (sbyte)target) { count++; }
+        }
+
+        if(count >= maxCount) {  return false; }
+
+        return result;
+    }
+
     /// <summary>
     /// 出力したパターンをスクリプタブルオブジェクトで保存する
     /// </summary>
@@ -65,60 +171,5 @@ public class CalculateTilePattern : MonoBehaviour
     }
 
 
-}
-
-
-[CreateAssetMenu(fileName = "AllHandPatterns", menuName = "Mahjong/AllHandPatterns")]
-public class AllHandPatterns : ScriptableObject
-{
-    public List<List<sbyte>> patterns = new List<List<sbyte>>();
-}
-
-public class AllHandPatternGenerator : MonoBehaviour
-{
-    [SerializeField] private AllHandPatterns allHandPatterns;
-
-    void Start()
-    {
-        allHandPatterns.patterns.Clear();
-        var patterns = GenerateAllHandPatterns(14);
-        foreach (var pattern in patterns)
-        {
-            allHandPatterns.patterns.Add(pattern);
-        }
-
-        Debug.Log("全ての手牌パターン数: " + allHandPatterns.patterns.Count);
-    }
-
-    // 再帰関数で14枚の手牌を生成
-    private List<List<sbyte>> GenerateCombinations(sbyte[] tiles, int targetLength, List<sbyte> currentHand = null, List<List<sbyte>> results = null)
-    {
-        currentHand ??= new List<sbyte>();
-        results ??= new List<List<sbyte>>();
-
-        // 終了条件: 14枚の手牌を持つ場合
-        if (currentHand.Count == targetLength)
-        {
-            results.Add(new List<sbyte>(currentHand));
-            return results;
-        }
-
-        // 再帰ステップ
-        for (int i = 0; i < tiles.Length; i++)
-        {
-            currentHand.Add(tiles[i]);
-            GenerateCombinations(tiles, targetLength, currentHand, results);
-            currentHand.RemoveAt(currentHand.Count - 1); // 追加した牌を削除してバックトラック
-        }
-
-        return results;
-    }
-
-    // 全ての手牌パターンを生成する
-    private List<List<sbyte>> GenerateAllHandPatterns(int targetLength)
-    {
-        sbyte[] tiles = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // 萬子の牌
-        return GenerateCombinations(tiles, targetLength);
-    }
 }
 
