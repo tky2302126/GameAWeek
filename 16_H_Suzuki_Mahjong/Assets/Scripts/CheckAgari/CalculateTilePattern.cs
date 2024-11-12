@@ -20,6 +20,12 @@ using UnityEngine;
 /// 河は17，18枚のため可能
 /// 
 /// </summary>
+/// 
+
+public struct Tiles 
+{
+    
+}
 public class CalculateTilePattern : MonoBehaviour
 {
     string folderPath = "Assets/Scripts/CheckAgari";
@@ -45,28 +51,26 @@ public class CalculateTilePattern : MonoBehaviour
     /// 手牌パターンをすべて書き出すスクリプト(清一色版)
     /// 
     /// 手牌パターン: 118800
-    ///               143975635
-    ///               多すぎる
-    ///               データ量が多すぎてメモリリークを起こしてそう
+    ///               
     ///               405,350(普通の麻雀の場合)
     /// </summary>
     public void GenerateALLHandPatternsTEST() 
     {
-        int MaxNum = 8;
+        int MaxNum = 9;
         int Length = 14;
         int MaxCount = 4;
-        patternTest.Clear();
+        //patternTest.Clear();
 
-        GeneratePattern(MaxNum, Length, MaxCount);
+        GenerateCombinations(MaxNum, Length, MaxCount);
 
-        Debug.Log($"パターン数{patternTest.Count}");
+        //Debug.Log($"パターン数{patternTest.Count}");
 
 
     }
     /// <summary>
     /// 再帰関数ですべての手牌パターンを記録する
-    /// インスタンスが巨大になるため、メモ化再帰関数を使う
-    /// 
+    /// インスタンスが巨大になるため、動的計画法を使う
+    /// https://qiita.com/GMR0009/items/adf21c20ea16cc991fb8
     /// </summary>
     /// <param name="maxNum"></param>
     /// <param name="length"></param>
@@ -109,19 +113,60 @@ public class CalculateTilePattern : MonoBehaviour
 
         return results;
     }
-
-    private List<byte[]> GeneratePatternByte(int maxNum, int length, int maxCount,
-                                         byte[] currentHand = null, List<byte[]> results = null,
-                                         int startIndex = 0) 
+    /// <summary>
+    /// 動的計画法を用いたすべての手牌パターンを列挙する関数
+    /// https://qiita.com/GMR0009/items/adf21c20ea16cc991fb8
+    /// </summary>
+    /// <param name="tileNum"> 牌の種類</param>
+    /// <param name="length"> 牌の枚数</param>
+    /// <param name="maxCount"> 重複していい枚数</param>
+    private void GenerateCombinations(int tileNum , int length , int maxCount = -1) 
     {
-        currentHand ??= new byte[5];
-        results ??= new List<byte[]>();
+        // 重複を許すパターン
+        if(maxCount == -1) { maxCount = tileNum; }
+        // テーブルの初期化
+        long[,] dynamicPrograming = new long[tileNum+1, length+1];
+        List<List<int>>[,] combinations = new List<List<int>>[tileNum + 1, length + 1];
 
+        // 初期条件
+        // 0種の場合、0枚を選ぶ組み合わせは1通り
+        dynamicPrograming[0, 0] = 1;
+        combinations[0, 0] = new List<List<int>> { new List<int>() };
 
+        // DPループ
 
-        return results;
-    }
+        for(int i = 1; i <= tileNum; i++) // 種類 
+        {
+            for(int j = 0; j <= length; j++) // 枚数
+            {
 
+                // combinations[i, j] が null の場合は初期化する
+                if (combinations[i, j] == null)
+                {
+                    combinations[i, j] = new List<List<int>>();
+                }
+                for (int k = 0; k <= maxCount; k++) // 現在の種類からk枚選ぶ 
+                {
+                    if(j >= k) 
+                    {
+                        dynamicPrograming[i, j] += dynamicPrograming[i - 1, j - k];
+                        if(combinations[i - 1, j - k] == null) //nullチェック
+                        {
+                            combinations[i - 1, j - k] = new List<List<int>>();
+                        }
+                        foreach (var prevCombination in combinations[i - 1, j - k])
+                        {
+                            var newCombination = new List<int>(prevCombination);
+                            newCombination.Add(k);
+                            combinations[i, j].Add(newCombination);
+                        }
+                    }
+                }
+            }
+        }
+
+        Debug.Log($"組み合わせの総数 : {dynamicPrograming[tileNum, length]}");
+    } 
 
 
     /// <summary>
