@@ -156,18 +156,18 @@ public class CalculateTilePattern : MonoBehaviour
     /// <param name="assetName"></param>
     private void SaveTilePattern(List<List<sbyte>> _patterns , string assetName) 
     {
-        TilePattern patterns = ScriptableObject.CreateInstance<TilePattern>();
+        //TilePattern patterns = ScriptableObject.CreateInstance<TilePattern>();
 
-        foreach (var item in _patterns)
-        {
-            patterns.patterns.Add(item);
-        }
+        //foreach (var item in _patterns)
+        //{
+        //    patterns.patterns.Add(item);
+        //}
 
-        string path = $"Assets/{assetName}.asset";
-        AssetDatabase.CreateAsset(patterns, path );
+        //string path = $"Assets/{assetName}.asset";
+        //AssetDatabase.CreateAsset(patterns, path );
 
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
+        //AssetDatabase.SaveAssets();
+        //AssetDatabase.Refresh();
     }
 
 

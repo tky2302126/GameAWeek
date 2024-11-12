@@ -338,7 +338,7 @@ namespace ShisenSho
                         if (Board.TileArray[y,x].State == State.None) 
                         {
                             emptyCellCount++;
-                            if(emptyCellCount == absValue /*+ 1*/) 
+                            if(emptyCellCount == absValue + 1) 
                             {
                                 return true;
                             }
