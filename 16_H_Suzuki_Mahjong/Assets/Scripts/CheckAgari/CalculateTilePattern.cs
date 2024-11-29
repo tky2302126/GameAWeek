@@ -1,31 +1,27 @@
-using System;
-using System.Collections;
+ï»¿using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
+
 /// <summary>
-/// –ƒ‚Ìè”vƒpƒ^[ƒ“‚ğƒXƒNƒŠƒvƒ^ƒuƒ‹ƒIƒuƒWƒFƒNƒg‚Å•Û‘¶‚·‚é
+/// éº»é›€ã®æ‰‹ç‰Œãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ–ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§ä¿å­˜ã™ã‚‹
 /// 
-/// ‚¢‚Á‚½‚ñ´ˆêF–ƒ‚Ål‚¦‚é
+/// ã„ã£ãŸã‚“æ¸…ä¸€è‰²éº»é›€ã§è€ƒãˆã‚‹
 /// 
-/// ‚·‚×‚Ä‚Ìè”vƒpƒ^[ƒ“‚ğ•Û‘¶‚·‚é
+/// ã™ã¹ã¦ã®æ‰‹ç‰Œãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’ä¿å­˜ã™ã‚‹
 /// 
-/// è”vƒpƒ^[ƒ“‚Ìƒ‹[ƒ‹
-/// 1í‚É‚Â‚«4–‡‚Ü‚Å
-/// ‡Œv‚Å14–‡
+/// æ‰‹ç‰Œãƒ‘ã‚¿ãƒ¼ãƒ³ã®ãƒ«ãƒ¼ãƒ«
+/// 1ç¨®ã«ã¤ã4æšã¾ã§
+/// åˆè¨ˆã§14æš
 /// 
-/// ‚·‚×‚Ä‚Ì‚ ‚ª‚èè”vƒpƒ^[ƒ“‚ğ•Û‘¶‚·‚é
-/// int ƒrƒbƒg‰‰Z‚Å”vî•ñ‚ğ‹L˜^‚Å‚«‚»‚¤
-/// ‰Í‚Í17C18–‡‚Ì‚½‚ß‰Â”\
+/// ã™ã¹ã¦ã®ã‚ãŒã‚Šæ‰‹ç‰Œãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’ä¿å­˜ã™ã‚‹
+/// int ãƒ“ãƒƒãƒˆæ¼”ç®—ã§ç‰Œæƒ…å ±ã‚’è¨˜éŒ²ã§ããã†
+/// æ²³ã¯17ï¼Œ18æšã®ãŸã‚å¯èƒ½
 /// 
 /// </summary>
 /// 
 
-public struct Tiles 
-{
-    
-}
+
 public class CalculateTilePattern : MonoBehaviour
 {
     string folderPath = "Assets/Scripts/CheckAgari";
@@ -48,28 +44,75 @@ public class CalculateTilePattern : MonoBehaviour
     }
 
     /// <summary>
-    /// è”vƒpƒ^[ƒ“‚ğ‚·‚×‚Ä‘‚«o‚·ƒXƒNƒŠƒvƒg(´ˆêF”Å)
+    /// æ‰‹ç‰Œãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’ã™ã¹ã¦æ›¸ãå‡ºã™ã‚¹ã‚¯ãƒªãƒ—ãƒˆ(æ¸…ä¸€è‰²ç‰ˆ)
     /// 
-    /// è”vƒpƒ^[ƒ“: 118800
+    /// æ‰‹ç‰Œãƒ‘ã‚¿ãƒ¼ãƒ³: 118800
     ///               
-    ///               405,350(•’Ê‚Ì–ƒ‚Ìê‡)
+    ///               405,350(æ™®é€šã®éº»é›€ã®å ´åˆ)
     /// </summary>
     public void GenerateALLHandPatternsTEST() 
     {
-        int MaxNum = 9;
+        int types = 9;
+        int maxCount = 4;
         int Length = 14;
-        int MaxCount = 4;
-        //patternTest.Clear();
 
-        GenerateCombinations(MaxNum, Length, MaxCount);
+        List<int[]> combinations = new List<int[]>();
+        List<int[]> agari = new List<int[]>();
+        
 
-        //Debug.Log($"ƒpƒ^[ƒ“”{patternTest.Count}");
+        GenerateCombinations(types,maxCount,Length,new int[types],0,combinations,agari);
+
+        Debug.Log($"çµ„ã¿åˆã‚ã›ã®ç·æ•° : {combinations.Count}");
+        Debug.Log($"ä¸ŠãŒã‚Šã®ç·æ•° : {agari.Count}");
 
 
+        HandPattern handPattern = ScriptableObject.CreateInstance<HandPattern>();
+        handPattern.handPatterns = combinations;
+
+        string path = "Assets/ALLPatternTest.asset";
+        UnityEditor.AssetDatabase.CreateAsset(handPattern, path);
+        UnityEditor.AssetDatabase.SaveAssets();
+    }
+
+    void GenerateCombinations(int types, int maxCount, int remaining, int[] current, int index, List<int[]> all, List<int[]> agari)
+    {
+        if (remaining == 0)
+        {
+            // æ¡ä»¶ã‚’æº€ãŸã—ãŸçµ„ã¿åˆã‚ã›ã‚’è¨˜éŒ²
+            all.Add((int[])current.Clone());
+
+            if (IsAgari(current)) 
+            {
+                agari.Add((int[])current.Clone());
+            }
+            return;
+        }
+
+        // é ˜åŸŸå¤–ã¯é™¤å¤–
+        if (index >= types) return;
+        // å†å¸°éƒ¨åˆ†
+        for (int i = 0; i <= Math.Min(maxCount, remaining); i++)
+        {
+            current[index] = i;
+            GenerateCombinations(types, maxCount, remaining - i, current, index + 1, all, agari);
+            current[index] = 0;
+        }
     }
     /// <summary>
-    /// Ä‹AŠÖ”‚Å‚·‚×‚Ä‚Ìè”vƒpƒ^[ƒ“‚ğ‹L˜^‚·‚é
-    /// ƒCƒ“ƒXƒ^ƒ“ƒX‚ª‹‘å‚É‚È‚é‚½‚ßA“®“IŒv‰æ–@‚ğg‚¤
+    /// ç¾åœ¨ã®æ‰‹ç‰ŒãŒå’Œäº†å½¢ã‹åˆ¤å®šã™ã‚‹
+    /// 
+    /// ! 4é¢å­1é›€é ­ã®ã¿å®Ÿè£…
+    /// </summary>
+    /// <param name="current"></param>
+    /// <returns></returns>
+    private bool IsAgari(int[] current)
+    {
+        return false;
+    }
+
+    /// <summary>
+    /// å†å¸°é–¢æ•°ã§ã™ã¹ã¦ã®æ‰‹ç‰Œãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’è¨˜éŒ²ã™ã‚‹
+    /// ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãŒå·¨å¤§ã«ãªã‚‹ãŸã‚ã€å‹•çš„è¨ˆç”»æ³•ã‚’ä½¿ã†
     /// https://qiita.com/GMR0009/items/adf21c20ea16cc991fb8
     /// </summary>
     /// <param name="maxNum"></param>
@@ -82,28 +125,28 @@ public class CalculateTilePattern : MonoBehaviour
         currentHand ??= new List<sbyte>();
         results ??= new List<List<sbyte>>();
 
-        // length‚É’B‚µ‚½
+        // lengthã«é”ã—ãŸæ™‚
         if(currentHand.Count == length) 
         {
             results.Add(new List<sbyte>(currentHand));
             return results;
         }
-        //ƒƒ‚ƒŠŠÇ——p‚É”z—ñ‚ÌƒTƒCƒY‚ğ§Œä
+        //ãƒ¡ãƒ¢ãƒªç®¡ç†ç”¨ã«é…åˆ—ã®ã‚µã‚¤ã‚ºã‚’åˆ¶å¾¡
         if(results.Count >= 1000) 
         {
             patternTest.AddRange(results);
             results.Clear();
         }
 
-        //Ä‹A•”•ª
-        // !‘O‚æ‚è¬‚³‚¢”‚ğ“ü‚ê‚È‚¢‚æ‚¤‚É‚·‚é
+        //å†å¸°éƒ¨åˆ†
+        // !å‰ã‚ˆã‚Šå°ã•ã„æ•°ã‚’å…¥ã‚Œãªã„ã‚ˆã†ã«ã™ã‚‹
         for(int i =startIndex; i <= maxNum; i++) 
         {
-            // “¯‚¶”v‚ª4–‡ˆÈã“ü‚ç‚È‚¢‚æ‚¤‚É‚·‚é
+            // åŒã˜ç‰ŒãŒ4æšä»¥ä¸Šå…¥ã‚‰ãªã„ã‚ˆã†ã«ã™ã‚‹
             if (!CheckSameTileLimit(currentHand, i, maxCount)) { continue; }
             currentHand.Add((sbyte)i);
             GeneratePattern(maxNum,length,maxCount,currentHand,results,i);
-            currentHand.RemoveAt(currentHand.Count - 1); //ƒoƒbƒNƒgƒ‰ƒbƒN
+            currentHand.RemoveAt(currentHand.Count - 1); //ãƒãƒƒã‚¯ãƒˆãƒ©ãƒƒã‚¯
 
         }
         if(results != null) 
@@ -114,43 +157,43 @@ public class CalculateTilePattern : MonoBehaviour
         return results;
     }
     /// <summary>
-    /// “®“IŒv‰æ–@‚ğ—p‚¢‚½‚·‚×‚Ä‚Ìè”vƒpƒ^[ƒ“‚ğ—ñ‹“‚·‚éŠÖ”
+    /// å‹•çš„è¨ˆç”»æ³•ã‚’ç”¨ã„ãŸã™ã¹ã¦ã®æ‰‹ç‰Œãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’åˆ—æŒ™ã™ã‚‹é–¢æ•°
     /// https://qiita.com/GMR0009/items/adf21c20ea16cc991fb8
     /// </summary>
-    /// <param name="tileNum"> ”v‚Ìí—Ş</param>
-    /// <param name="length"> ”v‚Ì–‡”</param>
-    /// <param name="maxCount"> d•¡‚µ‚Ä‚¢‚¢–‡”</param>
-    private void GenerateCombinations(int tileNum , int length , int maxCount = -1) 
+    /// <param name="tileNum"> ç‰Œã®ç¨®é¡</param>
+    /// <param name="length"> ç‰Œã®æšæ•°</param>
+    /// <param name="maxCount"> é‡è¤‡ã—ã¦ã„ã„æšæ•°</param>
+    private void GenerateCombinationsDP(int tileNum , int length , int maxCount = -1) 
     {
-        // d•¡‚ğ‹–‚·ƒpƒ^[ƒ“
+        // é‡è¤‡ã‚’è¨±ã™ãƒ‘ã‚¿ãƒ¼ãƒ³
         if(maxCount == -1) { maxCount = tileNum; }
-        // ƒe[ƒuƒ‹‚Ì‰Šú‰»
+        // ãƒ†ãƒ¼ãƒ–ãƒ«ã®åˆæœŸåŒ–
         long[,] dynamicPrograming = new long[tileNum+1, length+1];
         List<List<int>>[,] combinations = new List<List<int>>[tileNum + 1, length + 1];
 
-        // ‰ŠúğŒ
-        // 0í‚Ìê‡A0–‡‚ğ‘I‚Ô‘g‚İ‡‚í‚¹‚Í1’Ê‚è
+        // åˆæœŸæ¡ä»¶
+        // 0ç¨®ã®å ´åˆã€0æšã‚’é¸ã¶çµ„ã¿åˆã‚ã›ã¯1é€šã‚Š
         dynamicPrograming[0, 0] = 1;
         combinations[0, 0] = new List<List<int>> { new List<int>() };
 
-        // DPƒ‹[ƒv
+        // DPãƒ«ãƒ¼ãƒ—
 
-        for(int i = 1; i <= tileNum; i++) // í—Ş 
+        for(int i = 1; i <= tileNum; i++) // ç¨®é¡ 
         {
-            for(int j = 0; j <= length; j++) // –‡”
+            for(int j = 0; j <= length; j++) // æšæ•°
             {
 
-                // combinations[i, j] ‚ª null ‚Ìê‡‚Í‰Šú‰»‚·‚é
+                // combinations[i, j] ãŒ null ã®å ´åˆã¯åˆæœŸåŒ–ã™ã‚‹
                 if (combinations[i, j] == null)
                 {
                     combinations[i, j] = new List<List<int>>();
                 }
-                for (int k = 0; k <= maxCount; k++) // Œ»İ‚Ìí—Ş‚©‚çk–‡‘I‚Ô 
+                for (int k = 0; k <= maxCount; k++) // ç¾åœ¨ã®ç¨®é¡ã‹ã‚‰kæšé¸ã¶ 
                 {
                     if(j >= k) 
                     {
                         dynamicPrograming[i, j] += dynamicPrograming[i - 1, j - k];
-                        if(combinations[i - 1, j - k] == null) //nullƒ`ƒFƒbƒN
+                        if(combinations[i - 1, j - k] == null) //nullãƒã‚§ãƒƒã‚¯
                         {
                             combinations[i - 1, j - k] = new List<List<int>>();
                         }
@@ -165,13 +208,13 @@ public class CalculateTilePattern : MonoBehaviour
             }
         }
 
-        Debug.Log($"‘g‚İ‡‚í‚¹‚Ì‘” : {dynamicPrograming[tileNum, length]}");
+        Debug.Log($"çµ„ã¿åˆã‚ã›ã®ç·æ•° : {dynamicPrograming[tileNum, length]}");
     } 
 
 
     /// <summary>
-    /// w’è–‡”ˆÈã“¯‚¶”v‚ª“ü‚ç‚È‚¢‚æ‚¤‚É‚·‚é
-    /// true : ‚È‚µ false : ‚ ‚è 
+    /// æŒ‡å®šæšæ•°ä»¥ä¸ŠåŒã˜ç‰ŒãŒå…¥ã‚‰ãªã„ã‚ˆã†ã«ã™ã‚‹
+    /// true : ãªã— false : ã‚ã‚Š 
     /// </summary>
     /// <param name="currentHand"></param>
     /// <param name="target"></param>
@@ -195,7 +238,7 @@ public class CalculateTilePattern : MonoBehaviour
     }
 
     /// <summary>
-    /// o—Í‚µ‚½ƒpƒ^[ƒ“‚ğƒXƒNƒŠƒvƒ^ƒuƒ‹ƒIƒuƒWƒFƒNƒg‚Å•Û‘¶‚·‚é
+    /// å‡ºåŠ›ã—ãŸãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ–ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§ä¿å­˜ã™ã‚‹
     /// </summary>
     /// <param name="_patterns"></param>
     /// <param name="assetName"></param>
