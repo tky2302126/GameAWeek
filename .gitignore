@@ -36,6 +36,15 @@ CardGames/[Bb]uilds/
 CardGames/[Ll]ogs/
 CardGames/[Uu]ser[Ss]ettings/
 
+Tetris/[Ll]ibrary/
+Tetris/[Tt]emp/
+Tetris/[Oo]bj/
+Tetris/[Bb]uild/
+Tetris/[Bb]uilds/
+Tetris/[Ll]ogs/
+Tetris/[Uu]ser[Ss]ettings/
+
+
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
